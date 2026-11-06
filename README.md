@@ -200,6 +200,13 @@ python report.py --open   # 生成后自动打开浏览器
 
 `cover` 指标只在**前 2 段**里找要点——放宽到 4 段会让「关键词碰巧出现在陪跑段」的错答案蒙混通过，实测宽松口径会让总分虚高 4 个百分点。
 
+### `docker/` — 被评估系统的部署配置
+
+`docker-compose.example.yml` 是 5 个容器的完整配置（Open WebUI + Ollama + pgvector + TEI 重排 + 字段转换），
+`rerank-adapter/adapter.py` 是 TEI 与 Open WebUI 之间的字段名转换服务。
+
+搭法见 **[部署说明](docs/deploy.md)**。这套容器**不是本项目的运行依赖**——它们是评估的对象。
+
 ### `obs/` — 运行状态快照
 
 只读采集 13 项指标追加到 CSV：回答数、无资料占比、空回答、命中率中位/p10、prompt 长度分布、生成速度、容器重启次数、库体积。
@@ -286,6 +293,10 @@ python serve.py --port 9000  # 换端口
 ## 快速开始
 
 前提：Docker 环境，已跑起 Open WebUI + Ollama + pgvector（+ 可选的 TEI 重排）。
+
+> **这些容器怎么搭？** 见 **[部署说明](docs/deploy.md)**——包含 5 个容器的 compose、模型拉取、
+> 重排模型准备（最容易卡住的一步）、知识库创建，以及「为什么改了环境变量不生效」。
+> 已经有能跑的 Open WebUI 知识库，可以直接跳过。
 
 ```bash
 # 1. 评估：先按自己的环境改顶部常量，或用环境变量覆盖

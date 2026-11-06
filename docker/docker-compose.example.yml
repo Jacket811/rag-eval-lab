@@ -1,11 +1,16 @@
-# 最小可跑配置：Open WebUI + Ollama + pgvector
+# 完整配置：Open WebUI + Ollama + pgvector + TEI 重排 + 字段转换
 #
 # 使用方法：
-#   cp docker-compose.example.yml docker-compose.yml
-#   按需修改端口和数据卷路径，然后 docker compose up -d
+#   1. cp docker-compose.example.yml docker-compose.yml
+#   2. 改 POSTGRES_PASSWORD（或建 .env 写 PG_PASSWORD=xxx）
+#   3. 准备重排模型：见 docs/deploy.md 第 3 步
+#   4. docker compose up -d
 #
-# 注意：这个配置不包含重排服务（TEI + adapter）。
-# 没有重排时，hitrate.js 的分数来自向量相似度，量纲不同但脚本仍可用。
+# 只想要最简版（不要重排）？删掉 reranker 和 rerank-adapter 两段，
+# 再把 open-webui 的 RAG_RERANKING_ENGINE 改成 "" 即可，评估照样能跑，
+# 只是分数口径变成纯向量相似度。
+#
+# 注意：这几个容器只是「被评估的对象」。评估脚本在 eval/ 里，不在容器里。
 
 services:
   ollama:
@@ -16,7 +21,7 @@ services:
       - "11434:11434"
     volumes:
       - ollama-models:/root/.ollama
-    # 有 NVIDIA 显卡时取消下面注释
+    # 有 NVIDIA 显卡时取消下面注释（Windows + WSL2 需要装 NVIDIA Container Toolkit）
     # deploy:
     #   resources:
     #     reservations:
@@ -52,17 +57,66 @@ services:
       DATABASE_URL: postgresql://owui:${PG_PASSWORD:-changeme}@pgvector:5432/openwebui
       VECTOR_DB: pgvector
       PGVECTOR_DB_URL: postgresql://owui:${PG_PASSWORD:-changeme}@pgvector:5432/openwebui
-      # 嵌入模型跑在 CPU 上，避免和生成模型抢显存
-      # RAG_EMBEDDING_MODEL: bge-m3
+
+      # ===== 重排：走外部服务（slim 镜像没有 PyTorch，本地重排跑不起来）=====
+      RAG_RERANKING_ENGINE: external
+      RAG_EXTERNAL_RERANKER_URL: http://rerank-adapter:8080/rerank
+      RAG_EXTERNAL_RERANKER_TIMEOUT: "30"
+      RAG_RERANKING_MODEL: BAAI/bge-reranker-v2-m3
+
+      # 查询改写：默认关闭。开了会引入模型自身知识，实测拉低 top1
       ENABLE_RETRIEVAL_QUERY_GENERATION: "false"
+
     volumes:
       - open-webui-data:/app/backend/data
-      - ./theme:/app/build/static/theme:ro
     depends_on:
       pgvector:
         condition: service_healthy
       ollama:
         condition: service_started
+      rerank-adapter:
+        condition: service_started
+
+  # ===== 重排模型服务（CPU）=====
+  # 加载的是 ONNX 格式的 bge-reranker-v2-m3，见 docs/deploy.md 第 3 步
+  reranker:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    container_name: reranker
+    restart: unless-stopped
+    command:
+      - --model-id
+      - /data/model
+      - --port
+      - "80"
+      - --auto-truncate
+      - --max-batch-tokens
+      - "2048"
+      - --max-client-batch-size
+      - "8"
+      - --max-concurrent-requests
+      - "8"
+    volumes:
+      - ./models/bge-reranker-v2-m3-onnx:/data/model:ro
+    ports:
+      - "8081:80"
+
+  # ===== 字段名转换（TEI 返回 score，Open WebUI 要 relevance_score）=====
+  # 不加载模型，只做 JSON 字段翻译，开销可以忽略
+  rerank-adapter:
+    image: python:3.11-slim
+    container_name: rerank-adapter
+    restart: unless-stopped
+    command: ["python", "/adapter.py"]
+    environment:
+      TEI_URL: http://reranker:80/rerank
+      # 送给重排模型的单块字符数。低于 400 会把答案步骤切掉，正确块会掉名次
+      DOC_CHARS: "500"
+      # 必须 ≤ TEI 的 max-client-batch-size，超了会 422
+      BATCH: "8"
+    volumes:
+      - ./rerank-adapter/adapter.py:/adapter.py:ro
+    depends_on:
+      - reranker
 
 volumes:
   ollama-models:
