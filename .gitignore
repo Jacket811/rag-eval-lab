@@ -1,0 +1,43 @@
+# ===== 凭证（最重要，绝不能提交）=====
+.token
+*.token
+.env
+docker/.env
+
+# ===== 数据与数据库 =====
+*.db
+*.sqlite
+*.sqlite3
+webui.db
+
+# ===== 截图与图片素材（体积大，且可能含内网信息）=====
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# ===== 评估结果：只保留 3 个代表性样本，新跑的不入库 =====
+eval/results/*.csv
+!eval/results/20261105-153527-baseline.csv
+!eval/results/20261105-154025-strict2.csv
+!eval/results/20261105-163710-thr015.csv
+
+# ===== 观测快照（本地积累，不入库）=====
+obs/snapshots.csv
+
+# ===== 知识库原文（版权原因，不入库；仅放 docs-template 里的写法示例）=====
+knowledge-base/
+*.pdf
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# ===== 编辑器与系统 =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
