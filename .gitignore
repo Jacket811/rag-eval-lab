@@ -3,6 +3,7 @@
 *.token
 .env
 docker/.env
+docker-compose.yml
 
 # ===== 数据与数据库 =====
 *.db

@@ -315,12 +315,46 @@ python serve.py --port 9000  # 换端口
 
 ## 快速开始
 
-前提：Docker 环境，已跑起 Open WebUI + Ollama + pgvector（+ 可选的 TEI 重排）。
+### 没装过 Docker？照这个来
 
-> **这些容器怎么搭？** 见 **[部署说明](docs/deploy.md)**
->
+**[从零部署](docs/deploy.md)** 是写给零基础的：怎么装 Docker、双击哪个文件、网页里点哪里。
+全程不用敲命令，约 1 小时（大半在等下载）。
+
+```
+1. 装 Docker Desktop          docs/deploy.md 第 1 步
+2. 双击 setup.bat             自动拉镜像 + 下载模型
+3. 浏览器打开 localhost:3000   注册账号（第一个是管理员）
+4. 建知识库、传文档            拿到 collection ID
+5. 改 questions.json 一行      填你自己的 collection ID
+6. 双击 start.bat             点「开始评估」
+```
+
+### 已经装好 Docker 的
+
+```bash
+cp docker/docker-compose.simple.yml docker-compose.yml
+docker compose up -d
+docker exec ollama ollama pull qwen3:8b
+docker exec ollama ollama pull bge-m3
+```
+
+> 部分 ollama 镜像里容器内的 `ollama` 命令会报 `something went wrong`（CLI 坏了但服务正常）。
+> 遇到就用 HTTP 接口拉：
+> ```bash
+> curl -X POST http://127.0.0.1:11434/api/pull -d '{"name":"qwen3:8b"}'
+> curl -X POST http://127.0.0.1:11434/api/pull -d '{"name":"bge-m3"}'
+> ```
+
+然后按上面的 3—6 步。
+
+### 已经有能跑的知识库了
+
+直接用，从第 5 步开始（改 `eval/questions.json` 里的 collection）。
+
 > **参数那么多该改哪个？** 见 **[调参手册](docs/tuning.md)**——每个参数管什么、哪些改了要重建索引、
-> 怎么判断涨跌是不是噪声、本仓库实测出来的五条结论。——包含 5 个容器的 compose、模型拉取、
+> 怎么判断涨跌是不是噪声、本仓库实测出来的五条结论。
+>
+> **想要和文章里一致的完整链路？** 简化配置不含重排，见 [从零部署](docs/deploy.md) 的「进阶」一节。——包含 5 个容器的 compose、模型拉取、
 > 重排模型准备（最容易卡住的一步）、知识库创建，以及「为什么改了环境变量不生效」。
 > 已经有能跑的 Open WebUI 知识库，可以直接跳过。
 

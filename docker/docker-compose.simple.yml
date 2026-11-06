@@ -1,0 +1,73 @@
+# 简化配置：只有 3 个容器，不含重排
+#
+# 给第一次上手的人用。起来就能跑评估，只是分数口径是纯向量相似度，
+# 和本仓库的实测数字不能直接比。
+#
+# 想要完整链路（含 TEI 重排）？用 docker-compose.example.yml，见 docs/deploy.md。
+#
+#   1. cp docker-compose.simple.yml docker-compose.yml
+#   2. docker compose up -d
+#   3. docker exec ollama ollama pull qwen3:8b
+#   4. docker exec ollama ollama pull bge-m3
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    # 有 NVIDIA 显卡时取消下面注释
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: owui
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-changeme}
+      POSTGRES_DB: openwebui
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U owui -d openwebui"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.13.0-slim
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      DATABASE_URL: postgresql://owui:${PG_PASSWORD:-changeme}@pgvector:5432/openwebui
+      VECTOR_DB: pgvector
+      PGVECTOR_DB_URL: postgresql://owui:${PG_PASSWORD:-changeme}@pgvector:5432/openwebui
+      # 没有重排服务，关掉外部重排
+      RAG_RERANKING_ENGINE: ""
+      # 查询改写默认关，开了反而拉低准确率
+      ENABLE_RETRIEVAL_QUERY_GENERATION: "false"
+    volumes:
+      - open-webui-data:/app/backend/data
+    depends_on:
+      pgvector:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+volumes:
+  ollama-models:
+  pgdata:
+  open-webui-data:
