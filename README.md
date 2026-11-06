@@ -162,8 +162,19 @@ Dify 是目前最火的开源 LLM 应用平台（16 万星），不用它需要�
 python run_eval.py --validate        # 校验题库要点是否真的在库里
 python run_eval.py --run --tag xxx   # 跑一轮并打标签
 python run_eval.py --diff a.csv b.csv
+python snapshot.py                   # 查看当前配置快照
 python report.py                     # 生成单文件 HTML 报告
 ```
+
+每轮 `--run` 会在 CSV 旁边自动写一个同名 `.meta.json`，记录当时的：
+
+```
+rag.top_k / top_k_reranker / relevance_threshold / chunk_size ...
+重排地址、向量模型、分块参数、生成模型
+容器镜像与重启次数、知识库块数、git commit
+```
+
+报告里直接能看到两轮的参数差异。**没有这一步，一个月后你没法解释某个分数是怎么来的**——只记得"改过别名"，不记得当时 top_k 是多少。
 
 `report.py` 把 `results/` 下的**全部轮次**塞进一个自包含网页，页面顶部用下拉框随时切换「对比基准 / 当前」，不用重新生成、不用记文件名：
 

@@ -66,6 +66,17 @@ def load_round(path):
     return {"name": os.path.basename(path).replace(".csv", ""), "items": items}
 
 
+def load_meta(path):
+    """读同名 .meta.json（run_eval.py --run 自动生成），没有则 None"""
+    p = os.path.splitext(path)[0] + ".meta.json"
+    if not os.path.exists(p):
+        return None
+    try:
+        return json.load(io.open(p, encoding="utf-8"))
+    except (ValueError, IOError):
+        return None
+
+
 def pct(n, d):
     return round(100.0 * n / d, 1) if d else 0.0
 
@@ -145,7 +156,7 @@ h2{font-size:15px;font-weight:600;margin:0 0 3px}
 .kpi .v{font-size:25px;font-weight:600;letter-spacing:-.5px}
 .kpi .d{font-size:12px;margin-top:3px}
 .up{color:var(--good)}.down{color:var(--bad)}.flat{color:var(--t3)}
-.bar-row{display:grid;grid-template-columns:92px 1fr 138px;align-items:center;gap:12px;margin-bottom:11px}
+.bar-row{display:grid;grid-template-columns:92px 1fr 172px;align-items:center;gap:12px;margin-bottom:11px}
 .bar-name{font-size:13px;color:var(--t2)}
 .bar-val{font-size:12px;text-align:right;color:var(--t2);font-variant-numeric:tabular-nums}
 .pair{display:flex;flex-direction:column;gap:3px}
@@ -169,7 +180,7 @@ tr:hover td{background:#FCFBF8}
 .tag.miss{background:var(--bad-bg);color:#993C1D}
 footer{text-align:center;color:var(--t3);font-size:12px;margin-top:26px}
 @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}
-  .bar-row{grid-template-columns:70px 1fr 104px}.picker .note{display:none}}
+  .bar-row{grid-template-columns:70px 1fr 132px}.picker .note{display:none}}
 </style>
 </head>
 <body>
@@ -187,6 +198,12 @@ footer{text-align:center;color:var(--t3);font-size:12px;margin-top:26px}
   </div>
 
   <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <h2>当时的配置</h2>
+    <p class="hint">每轮跑完自动记录的参数快照，用来解释「为什么这两轮不一样」。</p>
+    <div id="conf"></div>
+  </div>
 
   <div class="card">
     <h2>分类命中率</h2>
@@ -271,6 +288,63 @@ function renderKpis(){
       <div class="d"><span class="up">↑ ${better}</span>　<span class="down">↓ ${worse}</span></div></div>`;
 }
 
+function fmtVal(v){
+  if (v === null || v === undefined) return "—";
+  if (v === true) return "开";
+  if (v === false) return "关";
+  return String(v);
+}
+
+function renderConfig(){
+  const A = R[iA], B = R[iB];
+  const ma = A.meta, mb = B.meta;
+  const el = document.getElementById("conf");
+  const conf = m => (m && m.config) || {};
+
+  if (!ma && !mb){
+    el.innerHTML = '<p class="hint" style="margin:0">这两轮没有参数快照——功能是后加的，' +
+      '旧 CSV 旁边没有 .meta.json。下一轮 <code>--run</code> 会自动记录。</p>';
+    return;
+  }
+
+  const metaLine = m => {
+    if (!m) return "";
+    const rt = m.runtime || {}, cd = m.code || {};
+    const bits = [];
+    if (rt.chunks) bits.push(rt.chunks.toLocaleString() + " 块");
+    if (cd.commit) bits.push("commit " + cd.commit + (cd.dirty ? "（有未提交改动）" : ""));
+    const gen = (m.config || {})["ui.default_models"];
+    if (gen) bits.push("生成模型 " + fmtVal(gen));
+    return `<div class="hint" style="margin:12px 0 0">${esc(m.ts || "")}　·　${bits.map(esc).join("　·　")}</div>`;
+  };
+
+  if (ma && mb){
+    const ca = conf(ma), cb = conf(mb);
+    const keys = [...new Set([...Object.keys(ca), ...Object.keys(cb)])].sort();
+    const diffs = keys.filter(k => JSON.stringify(ca[k]) !== JSON.stringify(cb[k]));
+    if (!diffs.length){
+      el.innerHTML = `<p style="margin:0 0 4px;color:var(--good)">两轮配置完全一致</p>` +
+        `<p class="hint" style="margin:0">分数变化来自文档、模型或数据本身，不是参数。</p>` + metaLine(mb);
+      return;
+    }
+    el.innerHTML = `<table><thead><tr><th>参数</th><th class="num">基准</th><th class="num">当前</th></tr></thead><tbody>` +
+      diffs.map(k => `<tr><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${esc(k)}</td>
+        <td class="num">${esc(fmtVal(ca[k]))}</td>
+        <td class="num"><b>${esc(fmtVal(cb[k]))}</b></td></tr>`).join("") +
+      `</tbody></table>` + metaLine(mb);
+    return;
+  }
+
+  const only = mb || ma;
+  const c = conf(only);
+  const keys = Object.keys(c).sort();
+  el.innerHTML = `<p class="hint" style="margin:0 0 10px">${mb ? "基准轮" : "当前轮"}没有参数快照，下面是${mb ? "当前轮" : "基准轮"}的配置。</p>` +
+    `<table><thead><tr><th>参数</th><th class="num">值</th></tr></thead><tbody>` +
+    keys.map(k => `<tr><td style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${esc(k)}</td>
+      <td class="num">${esc(fmtVal(c[k]))}</td></tr>`).join("") +
+    `</tbody></table>` + metaLine(only);
+}
+
 function renderCats(){
   const A = R[iA], B = R[iB];
   document.getElementById("cats").innerHTML = D.catOrder.filter(c => A.sums.cats[c] || B.sums.cats[c]).map(c => {
@@ -284,7 +358,7 @@ function renderCats(){
         <div class="tr"><div class="fl" style="width:${va}%;background:#CFCBC2"></div></div>
         <div class="tr"><div class="fl" style="width:${vb}%;background:${col}"></div></div>
       </div>
-      <div class="bar-val">${va.toFixed(1)}% → ${vb.toFixed(1)}% <span class="${cls}">${d>0?"+":""}${d}</span></div>
+      <div class="bar-val">${va.toFixed(1)}% → ${vb.toFixed(1)}%<span class="${cls}" style="display:inline-block;min-width:42px;margin-left:8px">${d>0?"+":""}${d}</span></div>
     </div>`;
   }).join("");
 }
@@ -364,7 +438,7 @@ function renderAll(noHash){
   const A = R[iA], B = R[iB];
   document.getElementById("note").textContent =
     iA === iB ? "同一轮，无对比" : `${Math.abs(iB-iA)} 轮之差`;
-  renderKpis(); renderCats(); renderScatter(); renderMovers(); renderFilters(); renderTable();
+  renderKpis(); renderConfig(); renderCats(); renderScatter(); renderMovers(); renderFilters(); renderTable();
   if (!noHash) location.hash = iA + "-" + iB;
 }
 
@@ -428,6 +502,7 @@ def main():
             continue
         rnd["sums"] = summarize(rnd)
         rnd["label"] = friendly(rnd["name"])
+        rnd["meta"] = load_meta(p)
         rounds.append(rnd)
 
     if not rounds:

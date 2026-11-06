@@ -195,6 +195,15 @@ def do_run(data, token, tag):
         for r in failed:
             print('  #%-2d [%s] %s' % (r['id'], r['cat'], r['q']))
 
+    # 把当时的配置存到同名 .meta.json，否则一个月后没法复现这一轮
+    try:
+        import snapshot
+        mp = snapshot.save(path, tag=tag)
+        if mp:
+            print('参数快照 %s' % os.path.basename(mp))
+    except Exception as e:
+        print('  ! 参数快照失败（不影响本次结果）：%s' % str(e)[:70])
+
     print('\n结果已写入 %s' % path)
     return path
 

@@ -17,10 +17,13 @@ webui.db
 *.gif
 *.webp
 
-# ===== 评估结果：只保留 3 个代表性样本，新跑的不入库 =====
+# ===== 评估结果：只保留代表性样本，新跑的不入库 =====
 eval/results/*.csv
+eval/results/*.meta.json
 !eval/results/*-v2-70q.csv
 !eval/results/*-after-alias.csv
+!eval/results/*-v2-70q.meta.json
+!eval/results/*-after-alias.meta.json
 
 # ===== 观测快照（本地积累，不入库）=====
 obs/snapshots.csv
