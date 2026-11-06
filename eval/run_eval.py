@@ -148,31 +148,46 @@ def do_run(data, token, tag):
             ok = (cov or 0) >= 0.5
         row = {'id': it['id'], 'cat': it['cat'], 'q': it['q'], 'top1': round(top1, 3),
                'w3': round(w, 3), 'cover': '' if cov is None else round(cov, 2),
-               'hit': 1 if ok else 0, 'segments': len(ds)}
+               'hit': 1 if ok else 0, 'segments': len(ds),
+               'difficulty': it.get('difficulty', 'mid'), 'flaky': 1 if it.get('flaky') else 0}
         rows.append(row)
         cat_stat[it['cat']].append(row)
         print('  %s #%-2d top1=%.2f w3=%.2f cover=%s | %s'
               % ('✅' if ok else '❌', it['id'], top1, w, row['cover'], it['q'][:24]))
 
     with open(path, 'w', encoding='utf-8-sig', newline='') as f:
-        wr = csv.DictWriter(f, fieldnames=['id', 'cat', 'q', 'top1', 'w3', 'cover', 'hit', 'segments'])
+        wr = csv.DictWriter(f, fieldnames=['id', 'cat', 'q', 'top1', 'w3', 'cover', 'hit',
+                                           'segments', 'difficulty', 'flaky'])
         wr.writeheader()
         wr.writerows(rows)
 
     print('\n=== 汇总（用时 %.0fs）===' % (time.time() - t0))
-    names = {'oral': '口语类', 'term': '术语类', 'multi': '多跳类', 'noans': '无答案类'}
+    names = {'oral': '口语类', 'term': '术语类', 'multi': '多跳类', 'noans': '无答案类',
+             'exact': '精确型', 'syn': '同义变体', 'cond': '带条件'}
+    order = ('oral', 'term', 'multi', 'exact', 'syn', 'cond', 'noans')
     total = []
-    for cat in ('oral', 'term', 'multi', 'noans'):
+    for cat in order:
         rs = cat_stat.get(cat, [])
         if not rs:
             continue
         total += rs
-        print('%-6s %2d 题  命中率 %5.1f%%  top1 %.3f  w3 %.3f'
-              % (names[cat], len(rs), 100 * sum(r['hit'] for r in rs) / len(rs),
+        print('%-8s %2d 题  命中率 %5.1f%%  top1 %.3f  w3 %.3f'
+              % (names.get(cat, cat), len(rs), 100 * sum(r['hit'] for r in rs) / len(rs),
                  sum(r['top1'] for r in rs) / len(rs), sum(r['w3'] for r in rs) / len(rs)))
-    print('%-6s %2d 题  命中率 %5.1f%%  top1 %.3f  w3 %.3f'
-          % ('合计', len(total), 100 * sum(r['hit'] for r in total) / len(total),
-             sum(r['top1'] for r in total) / len(total), sum(r['w3'] for r in total) / len(total)))
+
+    def line(label, rs):
+        if not rs:
+            return
+        print('%-8s %2d 题  命中率 %5.1f%%  top1 %.3f  w3 %.3f'
+              % (label, len(rs), 100 * sum(r['hit'] for r in rs) / len(rs),
+                 sum(r['top1'] for r in rs) / len(rs), sum(r['w3'] for r in rs) / len(rs)))
+
+    line('合计', total)
+    # 剔除边界题后的口径：flaky 题的分数在阈值附近抖动，会污染对比
+    stable = [r for r in total if not r['flaky']]
+    if len(stable) != len(total):
+        line('合计(仅稳定)', stable)
+        print('        ↑ 剔除 %d 道 flaky 题后的口径，做 A/B 对比时以此为准' % (len(total) - len(stable)))
 
     failed = [r for r in total if not r['hit']]
     if failed:

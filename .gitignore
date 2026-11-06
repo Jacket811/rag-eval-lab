@@ -19,9 +19,7 @@ webui.db
 
 # ===== 评估结果：只保留 3 个代表性样本，新跑的不入库 =====
 eval/results/*.csv
-!eval/results/20261105-153527-baseline.csv
-!eval/results/20261105-154025-strict2.csv
-!eval/results/20261105-163710-thr015.csv
+!eval/results/*-v2-70q.csv
 
 # ===== 观测快照（本地积累，不入库）=====
 obs/snapshots.csv

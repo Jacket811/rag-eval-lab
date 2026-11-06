@@ -1,63 +1,801 @@
 {
   "meta": {
-    "desc": "麒麟知识库评估集 v1",
+    "desc": "麒麟知识库评估集 v2（70 题，含精确型/同义变体/带条件/无答案）",
     "created": "2026-11-05",
     "collection": "8339ed09-be5a-46ec-9877-df93e0f771ee",
-    "note": "points = 正确答案所在资料里应出现的关键词；无答案类 points 为空，判定看 top1 是否足够低"
+    "note": "points = 正确答案所在资料里应出现的关键词；无答案类 points 为空，判定看 top1 是否足够低",
+    "updated": "2026-11-06",
+    "cats": {
+      "oral": "口语化提问",
+      "term": "术语提问",
+      "multi": "多跳（需两段资料）",
+      "noans": "库里没有，考敢不敢说没有",
+      "exact": "带错误码/型号/参数名",
+      "syn": "同义变体（测换说法是否掉队）",
+      "cond": "带前提条件"
+    }
   },
   "items": [
-    {"id": 1,  "cat": "oral", "q": "电脑连不上网了，网卡好像没起来", "points": ["网卡", "r8168", "卸载"]},
-    {"id": 2,  "cat": "oral", "q": "桌面图标全没了怎么找回来", "points": ["桌面图标", "消失", "恢复"]},
-    {"id": 3,  "cat": "oral", "q": "输入法切不出来只能打英文", "points": ["输入法", "fcitx", "搜狗"]},
-    {"id": 4,  "cat": "oral", "q": "系统没声音了，音量图标是灰的", "points": ["声音", "音量", "音频"]},
-    {"id": 5,  "cat": "oral", "q": "打印机加了没反应，列表里看不到", "points": ["打印机", "驱动", "添加"]},
-    {"id": 6,  "cat": "oral", "q": "U盘插上没反应，桌面不显示", "points": ["U盘", "挂载", "自动"]},
-    {"id": 7,  "cat": "oral", "q": "软件商店打不开一直转圈", "points": ["软件商店", "源", "更新"]},
-    {"id": 8,  "cat": "oral", "q": "屏幕分辨率不对，字特别大", "points": ["分辨率", "显示器", "设置"]},
-    {"id": 9,  "cat": "oral", "q": "装完双系统进不去麒麟，直接进 Windows", "points": ["双系统", "启动", "grub"]},
-    {"id": 10, "cat": "oral", "q": "忘记登录密码进不去系统怎么办", "points": ["密码", "单用户", "重置"]},
-    {"id": 11, "cat": "oral", "q": "蓝牙耳机连不上电脑", "points": ["蓝牙", "配对", "连接"]},
-    {"id": 12, "cat": "oral", "q": "电脑开机特别慢怎么优化", "points": ["开机", "启动项", "服务"]},
-    {"id": 13, "cat": "oral", "q": "触摸板不工作，鼠标能用一个", "points": ["触摸板", "触控板", "驱动"]},
-
-    {"id": 14, "cat": "term", "q": "错误码0009怎么解决", "points": ["0009", "激活码", "kylin"]},
-    {"id": 15, "cat": "term", "q": "r8168-dkms 怎么卸载", "points": ["r8168-dkms", "apt remove", "purge"]},
-    {"id": 16, "cat": "term", "q": "nmcli 怎么配置静态 IP", "points": ["nmcli", "ipv4", "静态"]},
-    {"id": 17, "cat": "term", "q": "怎么安装 deb 包", "points": ["deb", "dpkg", "apt"]},
-    {"id": 18, "cat": "term", "q": "怎么查看系统版本和内核版本", "points": ["内核", "版本", "uname"]},
-    {"id": 19, "cat": "term", "q": "时间同步失败怎么办", "points": ["时间", "同步", "ntp"]},
-    {"id": 20, "cat": "term", "q": "怎么查看磁盘空间占用", "points": ["磁盘", "空间", "df"]},
-    {"id": 21, "cat": "term", "q": "如何查看网卡驱动版本", "points": ["网卡", "驱动", "版本"]},
-    {"id": 22, "cat": "term", "q": "systemctl 怎么设置服务开机自启", "points": ["systemctl", "enable", "开机"]},
-    {"id": 23, "cat": "term", "q": "怎么创建新用户", "points": ["用户", "useradd", "密码"]},
-    {"id": 24, "cat": "term", "q": "远程桌面连不上", "points": ["远程", "rdp", "remmina"]},
-    {"id": 25, "cat": "term", "q": "如何修改主机名", "points": ["主机名", "hostname", "hostnamectl"]},
-
-    {"id": 26, "cat": "multi", "q": "系统升级后网卡不加载，是不是驱动问题", "points": ["升级", "网卡", "驱动", "r8168"]},
-    {"id": 27, "cat": "multi", "q": "系统盘满了导致软件商店打不开怎么办", "points": ["磁盘", "空间", "软件商店"]},
-    {"id": 28, "cat": "multi", "q": "双系统装完进不去麒麟，怎么修复引导", "points": ["双系统", "grub", "引导"]},
-    {"id": 29, "cat": "multi", "q": "输入法卡死而且任务栏状态栏也没了", "points": ["输入法", "状态栏", "sogou"]},
-    {"id": 30, "cat": "multi", "q": "忘记密码但又想保留数据，怎么重置", "points": ["密码", "单用户", "数据"]},
-    {"id": 31, "cat": "multi", "q": "U盘不识别，换到另一台机器也一样", "points": ["U盘", "挂载", "识别"]},
-    {"id": 32, "cat": "multi", "q": "打印机驱动装了但打出来是乱码", "points": ["打印机", "驱动", "乱码"]},
-    {"id": 33, "cat": "multi", "q": "装了显卡驱动之后黑屏怎么恢复", "points": ["显卡", "驱动", "黑屏"]},
-    {"id": 34, "cat": "multi", "q": "系统时间不对导致网页证书报错", "points": ["时间", "证书", "同步"]},
-    {"id": 35, "cat": "multi", "q": "麒麟系统怎么用 Windows 共享的打印机", "points": ["共享", "打印", "samba"]},
-    {"id": 36, "cat": "multi", "q": "远程桌面连上后黑屏", "points": ["远程", "黑屏", "rdp"]},
-    {"id": 37, "cat": "multi", "q": "升级系统后 SSH 连不上服务器", "points": ["ssh", "端口", "防火墙"]},
-    {"id": 38, "cat": "multi", "q": "分辨率改了回不去，显示器不被识别", "points": ["分辨率", "显示器", "识别"]},
-
-    {"id": 39, "cat": "noans", "q": "麒麟系统怎么部署 Kubernetes 集群", "points": []},
-    {"id": 40, "cat": "noans", "q": "怎么在麒麟上安装 CUDA 12 驱动", "points": []},
-    {"id": 41, "cat": "noans", "q": "Ansible 如何批量管理麒麟服务器", "points": []},
-    {"id": 42, "cat": "noans", "q": "麒麟怎么配置 Redis 集群", "points": []},
-    {"id": 43, "cat": "noans", "q": "如何把 GPU 直通给虚拟机使用", "points": []},
-    {"id": 44, "cat": "noans", "q": "麒麟支持 Docker Swarm 吗", "points": []},
-    {"id": 45, "cat": "noans", "q": "怎么把系统数据同步到对象存储", "points": []},
-    {"id": 46, "cat": "noans", "q": "如何编译一个内核模块", "points": []},
-    {"id": 47, "cat": "noans", "q": "有没有麒麟手机端的客户端", "points": []},
-    {"id": 48, "cat": "noans", "q": "kubectl 连不上集群怎么排查", "points": []},
-    {"id": 49, "cat": "noans", "q": "麒麟怎么配置 nginx 反向代理", "points": []},
-    {"id": 50, "cat": "noans", "q": "用 vfio 绑定显卡给 KVM 虚拟机", "points": []}
+    {
+      "id": 1,
+      "cat": "oral",
+      "q": "电脑连不上网了，网卡好像没起来",
+      "points": [
+        "网卡",
+        "r8168",
+        "卸载"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 2,
+      "cat": "oral",
+      "q": "桌面图标全没了怎么找回来",
+      "points": [
+        "桌面图标",
+        "消失",
+        "恢复"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 3,
+      "cat": "oral",
+      "q": "输入法切不出来只能打英文",
+      "points": [
+        "输入法",
+        "fcitx",
+        "搜狗"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 4,
+      "cat": "oral",
+      "q": "系统没声音了，音量图标是灰的",
+      "points": [
+        "声音",
+        "音量",
+        "音频"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 5,
+      "cat": "oral",
+      "q": "打印机加了没反应，列表里看不到",
+      "points": [
+        "打印机",
+        "驱动",
+        "添加"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 6,
+      "cat": "oral",
+      "q": "U盘插上没反应，桌面不显示",
+      "points": [
+        "U盘",
+        "挂载",
+        "自动"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 7,
+      "cat": "oral",
+      "q": "软件商店打不开一直转圈",
+      "points": [
+        "软件商店",
+        "源",
+        "更新"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 8,
+      "cat": "oral",
+      "q": "屏幕分辨率不对，字特别大",
+      "points": [
+        "分辨率",
+        "显示器",
+        "设置"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 9,
+      "cat": "oral",
+      "q": "装完双系统进不去麒麟，直接进 Windows",
+      "points": [
+        "双系统",
+        "启动",
+        "grub"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 10,
+      "cat": "oral",
+      "q": "忘记登录密码进不去系统怎么办",
+      "points": [
+        "密码",
+        "单用户",
+        "重置"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 11,
+      "cat": "oral",
+      "q": "蓝牙耳机连不上电脑",
+      "points": [
+        "蓝牙",
+        "配对",
+        "连接"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 12,
+      "cat": "oral",
+      "q": "电脑开机特别慢怎么优化",
+      "points": [
+        "开机",
+        "启动项",
+        "服务"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 13,
+      "cat": "oral",
+      "q": "触摸板不工作，鼠标能用一个",
+      "points": [
+        "触摸板",
+        "触控板",
+        "驱动"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 14,
+      "cat": "term",
+      "q": "错误码0009怎么解决",
+      "points": [
+        "0009",
+        "激活码",
+        "kylin"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 15,
+      "cat": "term",
+      "q": "r8168-dkms 怎么卸载",
+      "points": [
+        "r8168-dkms",
+        "apt remove",
+        "purge"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 16,
+      "cat": "term",
+      "q": "nmcli 怎么配置静态 IP",
+      "points": [
+        "nmcli",
+        "ipv4",
+        "静态"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 17,
+      "cat": "term",
+      "q": "怎么安装 deb 包",
+      "points": [
+        "deb",
+        "dpkg",
+        "apt"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 18,
+      "cat": "term",
+      "q": "怎么查看系统版本和内核版本",
+      "points": [
+        "内核",
+        "版本",
+        "uname"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 19,
+      "cat": "term",
+      "q": "时间同步失败怎么办",
+      "points": [
+        "时间",
+        "同步",
+        "ntp"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 20,
+      "cat": "term",
+      "q": "怎么查看磁盘空间占用",
+      "points": [
+        "磁盘",
+        "空间",
+        "df"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 21,
+      "cat": "term",
+      "q": "如何查看网卡驱动版本",
+      "points": [
+        "网卡",
+        "驱动",
+        "版本"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 22,
+      "cat": "term",
+      "q": "systemctl 怎么设置服务开机自启",
+      "points": [
+        "systemctl",
+        "enable",
+        "开机"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 23,
+      "cat": "term",
+      "q": "怎么创建新用户",
+      "points": [
+        "用户",
+        "useradd",
+        "密码"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 24,
+      "cat": "term",
+      "q": "远程桌面连不上",
+      "points": [
+        "远程",
+        "rdp",
+        "remmina"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 25,
+      "cat": "term",
+      "q": "如何修改主机名",
+      "points": [
+        "主机名",
+        "hostname",
+        "hostnamectl"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 26,
+      "cat": "multi",
+      "q": "系统升级后网卡不加载，是不是驱动问题",
+      "points": [
+        "升级",
+        "网卡",
+        "驱动",
+        "r8168"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 27,
+      "cat": "multi",
+      "q": "系统盘满了导致软件商店打不开怎么办",
+      "points": [
+        "磁盘",
+        "空间",
+        "软件商店"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 28,
+      "cat": "multi",
+      "q": "双系统装完进不去麒麟，怎么修复引导",
+      "points": [
+        "双系统",
+        "grub",
+        "引导"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 29,
+      "cat": "multi",
+      "q": "输入法卡死而且任务栏状态栏也没了",
+      "points": [
+        "输入法",
+        "状态栏",
+        "sogou"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 30,
+      "cat": "multi",
+      "q": "忘记密码但又想保留数据，怎么重置",
+      "points": [
+        "密码",
+        "单用户",
+        "数据"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 31,
+      "cat": "multi",
+      "q": "U盘不识别，换到另一台机器也一样",
+      "points": [
+        "U盘",
+        "挂载",
+        "识别"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 32,
+      "cat": "multi",
+      "q": "打印机驱动装了但打出来是乱码",
+      "points": [
+        "打印机",
+        "驱动",
+        "乱码"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 33,
+      "cat": "multi",
+      "q": "装了显卡驱动之后黑屏怎么恢复",
+      "points": [
+        "显卡",
+        "驱动",
+        "黑屏"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 34,
+      "cat": "multi",
+      "q": "系统时间不对导致网页证书报错",
+      "points": [
+        "时间",
+        "证书",
+        "同步"
+      ],
+      "difficulty": "mid",
+      "flaky": true
+    },
+    {
+      "id": 35,
+      "cat": "multi",
+      "q": "麒麟系统怎么用 Windows 共享的打印机",
+      "points": [
+        "共享",
+        "打印",
+        "samba"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 36,
+      "cat": "multi",
+      "q": "远程桌面连上后黑屏",
+      "points": [
+        "远程",
+        "黑屏",
+        "rdp"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 37,
+      "cat": "multi",
+      "q": "升级系统后 SSH 连不上服务器",
+      "points": [
+        "ssh",
+        "端口",
+        "防火墙"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 38,
+      "cat": "multi",
+      "q": "分辨率改了回不去，显示器不被识别",
+      "points": [
+        "分辨率",
+        "显示器",
+        "识别"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 39,
+      "cat": "noans",
+      "q": "麒麟系统怎么部署 Kubernetes 集群",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 40,
+      "cat": "noans",
+      "q": "怎么在麒麟上安装 CUDA 12 驱动",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 41,
+      "cat": "noans",
+      "q": "Ansible 如何批量管理麒麟服务器",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 42,
+      "cat": "noans",
+      "q": "麒麟怎么配置 Redis 集群",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 43,
+      "cat": "noans",
+      "q": "如何把 GPU 直通给虚拟机使用",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 44,
+      "cat": "noans",
+      "q": "麒麟支持 Docker Swarm 吗",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 45,
+      "cat": "noans",
+      "q": "怎么把系统数据同步到对象存储",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 46,
+      "cat": "noans",
+      "q": "如何编译一个内核模块",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 47,
+      "cat": "noans",
+      "q": "有没有麒麟手机端的客户端",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 48,
+      "cat": "noans",
+      "q": "kubectl 连不上集群怎么排查",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 49,
+      "cat": "noans",
+      "q": "麒麟怎么配置 nginx 反向代理",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 50,
+      "cat": "noans",
+      "q": "用 vfio 绑定显卡给 KVM 虚拟机",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 51,
+      "cat": "exact",
+      "q": "软件商店卸载软件报错0004怎么办",
+      "points": [
+        "0004",
+        "dpkg",
+        "force-remove"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 52,
+      "cat": "exact",
+      "q": "软件商店下载提示网络错误0006",
+      "points": [
+        "0006",
+        "80",
+        "端口"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 53,
+      "cat": "exact",
+      "q": "软件商店提示空间不足错误码0007",
+      "points": [
+        "0007",
+        "空间",
+        "缓存"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 54,
+      "cat": "exact",
+      "q": "长城TN140A2笔记本指纹用不了",
+      "points": [
+        "TN140A2",
+        "指纹",
+        "驱动"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 55,
+      "cat": "exact",
+      "q": "RTL8111 网卡用什么驱动",
+      "points": [
+        "8111",
+        "r8168",
+        "驱动"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 56,
+      "cat": "exact",
+      "q": "ifcfg 文件里 BOOTPROTO 该设成什么",
+      "points": [
+        "BOOTPROTO",
+        "static",
+        "dhcp"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 57,
+      "cat": "syn",
+      "q": "上不了网，ifconfig 看不到网卡",
+      "points": [
+        "网卡",
+        "r8168",
+        "卸载"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 58,
+      "cat": "syn",
+      "q": "桌面上的东西全没了",
+      "points": [
+        "桌面图标",
+        "消失",
+        "恢复"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 59,
+      "cat": "syn",
+      "q": "打不出中文只能打英文",
+      "points": [
+        "输入法",
+        "fcitx",
+        "搜狗"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 60,
+      "cat": "syn",
+      "q": "右下角喇叭图标灰的点不动",
+      "points": [
+        "声音",
+        "音量",
+        "音频"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 61,
+      "cat": "syn",
+      "q": "插了U盘桌面没反应",
+      "points": [
+        "U盘",
+        "挂载",
+        "自动"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 62,
+      "cat": "syn",
+      "q": "应用商店一直转圈进不去",
+      "points": [
+        "软件商店",
+        "源",
+        "更新"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 63,
+      "cat": "syn",
+      "q": "屏幕上的字特别大改不小",
+      "points": [
+        "分辨率",
+        "显示器",
+        "设置"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 64,
+      "cat": "syn",
+      "q": "开机直接进 Windows 了",
+      "points": [
+        "双系统",
+        "启动",
+        "grub"
+      ],
+      "difficulty": "easy",
+      "flaky": false
+    },
+    {
+      "id": 65,
+      "cat": "cond",
+      "q": "没网的情况下怎么安装 deb 包",
+      "points": [
+        "dpkg -i",
+        "deb",
+        "离线"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 66,
+      "cat": "cond",
+      "q": "U盘能识别但打不开提示没有权限",
+      "points": [
+        "U盘",
+        "权限",
+        "挂载"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 67,
+      "cat": "cond",
+      "q": "电脑能上网但网页打不开",
+      "points": [
+        "DNS",
+        "解析",
+        "resolv"
+      ],
+      "difficulty": "mid",
+      "flaky": false
+    },
+    {
+      "id": 68,
+      "cat": "noans",
+      "q": "ifcfg 里的 NM_CONTROLLED 参数是干什么的",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 69,
+      "cat": "noans",
+      "q": "麒麟系统支持 Podman 吗",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    },
+    {
+      "id": 70,
+      "cat": "noans",
+      "q": "怎么在麒麟上用 Flatpak 安装软件",
+      "points": [],
+      "difficulty": "hard",
+      "flaky": false
+    }
   ]
 }
