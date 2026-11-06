@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAG 评估 · 控制台</title>
+<style>
+:root{
+  --bg:#FBFAF7;--card:#FFF;--line:#E5E2DA;--t1:#1F1E1B;--t2:#5F5E5A;--t3:#8C8A83;
+  --good:#1D9E75;--bad:#C0492A;--warn:#BA7517;
+  --good-bg:#E1F5EE;--bad-bg:#FAECE7;--warn-bg:#FAEEDA;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t1);padding:26px 20px 60px;
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0 0 3px}
+.sub{color:var(--t3);font-size:12px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+h2{font-size:14px;font-weight:600;margin:0 0 12px}
+.checks{display:flex;flex-direction:column;gap:9px;margin-bottom:4px}
+.chk{display:flex;align-items:flex-start;gap:9px;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--t3)}
+.dot.ok{background:var(--good)} .dot.bad{background:var(--bad)} .dot.wait{background:var(--warn)}
+.chk .n{color:var(--t2)} .chk .d{color:var(--t3);font-size:12px}
+.kv{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pill{font-size:12px;background:#F3F1EC;color:var(--t2);border-radius:14px;padding:3px 10px}
+label{display:block;font-size:12px;color:var(--t3);margin:14px 0 6px}
+input[type=text]{width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--t1)}
+input[type=text]:focus{outline:2px solid #CFCBC2;outline-offset:1px}
+button{font:inherit;border:none;border-radius:9px;padding:11px 18px;cursor:pointer;font-weight:500}
+.btn-main{background:var(--t1);color:#fff;width:100%;margin-top:14px;font-size:14px}
+.btn-main:disabled{background:#CFCBC2;cursor:not-allowed}
+.btn-go{background:var(--good);color:#fff;width:100%;margin-top:10px}
+.btn-line{background:#fff;border:1px solid var(--line);color:var(--t2);width:100%;margin-top:8px}
+.btn-line:hover{border-color:#C9C5BA}
+.bar{height:6px;background:#F3F1EC;border-radius:3px;overflow:hidden;margin:14px 0 8px}
+.bar div{height:100%;background:var(--good);width:0;transition:width .3s}
+.prog{display:flex;justify-content:space-between;font-size:12px;color:var(--t3)}
+pre.log{margin:12px 0 0;background:#1F1E1B;color:#D9D6CE;border-radius:9px;padding:14px 16px;
+  font:12px/1.65 ui-monospace,Consolas,Menlo,monospace;max-height:340px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+pre.log::-webkit-scrollbar{width:8px}
+pre.log::-webkit-scrollbar-thumb{background:#444;border-radius:4px}
+.runs{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.run{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;font-size:12px;background:#FDFCFA}
+.run .nm{color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.run .rt{font-variant-numeric:tabular-nums;color:var(--t1);font-weight:500;flex:none}
+.run .no{color:var(--t3);font-size:11px}
+.msg{margin-top:12px;padding:11px 14px;border-radius:9px;font-size:13px;display:none}
+.msg.ok{display:block;background:var(--good-bg);color:#0F6E56}
+.msg.bad{display:block;background:var(--bad-bg);color:#993C1D}
+.msg.warn{display:block;background:var(--warn-bg);color:#854F0B}
+.empty{color:var(--t3);font-size:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RAG 评估 · 控制台</h1>
+  <div class="sub" id="sub">正在检查环境…</div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>环境</h2>
+        <div class="checks" id="checks">
+          <div class="chk"><span class="dot wait"></span><span class="n">正在检测…</span></div>
+        </div>
+        <div class="kv" id="qinfo"></div>
+      </div>
+
+      <div class="card">
+        <h2>跑一轮评估</h2>
+        <label for="tag">这一轮的标签（便于日后对比）</label>
+        <input type="text" id="tag" placeholder="例如：基线 / 改别名 / kr6" autocomplete="off">
+        <button class="btn-main" id="btnRun" disabled>开始评估</button>
+        <button class="btn-line" id="btnStop" style="display:none;color:#993C1D;border-color:#F0C4B4">停止</button>
+        <div class="msg" id="msg"></div>
+
+        <div id="runBox" style="display:none">
+          <div class="bar"><div id="progFill"></div></div>
+          <div class="prog"><span id="progText">准备中…</span><span id="progTime"></span></div>
+          <pre class="log" id="log"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>历史轮次</h2>
+        <div class="runs" id="runs"><span class="empty">加载中…</span></div>
+        <button class="btn-line" id="btnReport">打开对比报告</button>
+      </div>
+      <div class="card">
+        <h2>说明</h2>
+        <p class="empty" style="margin:0;line-height:1.7">
+          评估只测检索层，不调用生成模型。<br>
+          70 题约 4–6 分钟，第一条会等 10 秒左右（重排冷启动）。<br>
+          每轮结果存在 <code>eval/results/</code>，配置存同名 <code>.meta.json</code>。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let STATE = {running:false, since:0, total:0, timer:null, timing:null};
+const CAT = {oral:"口语",term:"术语",multi:"多跳",noans:"无答案",exact:"精确型",syn:"同义变体",cond:"带条件"};
+const $ = id => document.getElementById(id);
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+async function jget(u){ const r = await fetch(u); return r.json(); }
+async function jpost(u, body){ const r = await fetch(u, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body||{})}); return r.json(); }
+
+function renderChecks(st){
+  const q = st.questions, c = st.containers;
+  const items = [];
+
+  const cOk = c && c.missing && c.missing.length === 0;
+  items.push({
+    ok: cOk,
+    n: "容器",
+    d: cOk ? "open-webui / pgvector / ollama 都在运行"
+           : "缺少：" + ((c.missing||[]).join("、") || "无法读取 docker")
+  });
+
+  if (q && q.ok){
+    const catTxt = Object.entries(q.cats).map(([k,v]) => (CAT[k]||k) + " " + v).join(" · ");
+    items.push({ok:true, n:"题库", d: q.total + " 题（" + catTxt + "）"});
+  } else {
+    items.push({ok:false, n:"题库", d: (q && q.error) || "读不到 questions.json"});
+  }
+
+  $("checks").innerHTML = items.map(i =>
+    `<div class="chk"><span class="dot ${i.ok ? "ok":"bad"}"></span>
+      <span><span class="n">${esc(i.n)}</span><br><span class="d">${esc(i.d)}</span></span></div>`).join("") +
+    `<div class="chk"><span class="dot wait" id="tokDot"></span>
+      <span><span class="n">登录凭证</span><br><span class="d" id="tokDesc">检查中…</span></span></div>`;
+
+  if (q && q.ok && q.collection){
+    $("qinfo").innerHTML = `<span class="pill">知识库 ${esc(q.collection.slice(0,8))}…</span>` +
+      (q.desc ? `<span class="pill">${esc(q.desc)}</span>` : "");
+  }
+  return cOk && q && q.ok;
+}
+
+async function checkToken(){
+  try{
+    const r = await jget("/api/check");
+    const t = r.token || {};
+    $("tokDot").className = "dot " + (t.ok ? "ok" : "bad");
+    $("tokDesc").textContent = t.ok ? "已能取到 Open WebUI token" : (t.hint || "取不到 token");
+    return !!t.ok;
+  }catch(e){
+    $("tokDot").className = "dot bad";
+    $("tokDesc").textContent = "检查失败：" + e.message;
+    return false;
+  }
+}
+
+function renderRuns(list){
+  if (!list.length){ $("runs").innerHTML = '<span class="empty">还没有跑过</span>'; return; }
+  $("runs").innerHTML = list.slice().reverse().map(r => `
+    <div class="run" title="${esc(r.name)}">
+      <span style="min-width:0">
+        <div class="nm">${esc(r.name.replace(/^\d{8}-\d{6}-?/, ""))}</div>
+        <div class="no">${esc(r.mtime)} · ${r.hits}/${r.total}${r.has_meta ? "" : " · 无配置快照"}</div>
+      </span>
+      <span class="rt">${r.rate}%</span>
+    </div>`).join("");
+}
+
+async function refresh(){
+  const st = await jget("/api/state");
+  renderRuns(st.past);
+  const okBase = renderChecks(st);
+  const okTok = await checkToken();
+  $("sub").textContent = "评估对象：本地 Open WebUI（检索层）　·　共 " +
+    (st.past.length) + " 轮历史";
+  if (st.job.running){
+    $("btnRun").disabled = true;
+    $("runBox").style.display = "block";
+    startPolling();
+  } else {
+    $("btnRun").disabled = !(okBase && okTok);
+    $("btnRun").textContent = (okBase && okTok) ? "开始评估" : "环境未就绪";
+  }
+  return st;
+}
+
+function countDone(lines){
+  let n = 0;
+  for (const l of lines) if (/^\s*[✅❌]\s*#\d+/.test(l)) n++;
+  return n;
+}
+
+function pushLog(lines){
+  const el = $("log");
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  el.textContent += lines.join("\n") + "\n";
+  if (atBottom) el.scrollTop = el.scrollHeight;
+}
+
+function startPolling(){
+  if (STATE.timer) return;
+  STATE.timer = setInterval(tick, 1200);
+  if (!STATE.timing) STATE.timing = setInterval(() => {
+    const s = Math.floor((Date.now() - STATE.t0) / 1000);
+    $("progTime").textContent = Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
+  }, 1000);
+  tick();
+}
+
+async function tick(){
+  try{
+    const r = await jget("/api/log?since=" + STATE.since);
+    if (r.lines && r.lines.length){
+      pushLog(r.lines);
+      STATE.since = r.next;
+      const done = countDone(r.lines) + (STATE.doneBase || 0);
+      STATE.doneBase = done;
+      const total = STATE.totalQ || 70;
+      const pct = Math.min(100, Math.round(100 * done / total));
+      $("progFill").style.width = pct + "%";
+      $("progText").textContent = done + "/" + total + " 题完成";
+    }
+    if (!r.running){
+      clearInterval(STATE.timer); STATE.timer = null;
+      clearInterval(STATE.timing); STATE.timing = null;
+      $("btnStop").style.display = "none";
+      const st = await jget("/api/state");
+      const job = st.job;
+      const okRun = (job.returncode === 0);
+      if (okRun){
+        $("progFill").style.width = "100%";
+        $("progText").textContent = "评估完成";
+        await regenerate();
+      } else {
+        $("progText").textContent = "已中断";
+      }
+      await refresh();
+      if (job.error){
+        showMsg("bad", "出错了：" + job.error);
+      } else if (!okRun){
+        showMsg("warn", "已中断，本次结果未保存。重新点「开始评估」即可再来一次。");
+      } else {
+        showMsg("ok", "完成。点击右侧「打开对比报告」查看本轮与历史的变化。");
+        $("btnReport").style.background = "#F2FAF6";
+      }
+    }
+  }catch(e){
+    console.warn("poll fail", e);
+  }
+}
+
+async function regenerate(){
+  try{ await jpost("/api/report", {}); }catch(e){}
+}
+
+function showMsg(kind, text){
+  const el = $("msg");
+  el.className = "msg " + kind;
+  el.textContent = text;
+}
+
+$("btnRun").onclick = async () => {
+  const tag = $("tag").value.trim();
+  $("btnRun").disabled = true;
+  $("btnRun").textContent = "启动中…";
+  const r = await jpost("/api/run", {tag});
+  if (r.error){ showMsg("bad", r.error); $("btnRun").disabled = false; $("btnRun").textContent = "开始评估"; return; }
+  $("msg").className = "msg";
+  $("log").textContent = "";
+  STATE.since = 0; STATE.doneBase = 0;
+  STATE.t0 = Date.now();
+  $("runBox").style.display = "block";
+  $("btnRun").textContent = "运行中…";
+  $("btnStop").style.display = "block";
+  $("btnStop").disabled = false;
+  $("btnStop").textContent = "停止";
+  startPolling();
+};
+
+$("btnStop").onclick = async () => {
+  $("btnStop").disabled = true;
+  $("btnStop").textContent = "停止中…";
+  await jpost("/api/stop", {});
+  showMsg("warn", "已发送停止信号，本次结果不会写入。");
+};
+
+$("btnReport").onclick = () => { window.open("/report.html", "_blank"); };
+$("tag").addEventListener("keydown", e => { if (e.key === "Enter" && !$("btnRun").disabled) $("btnRun").click(); });
+
+(async () => {
+  const st = await refresh();
+  STATE.totalQ = (st.questions && st.questions.total) || 70;
+})();
+</script>
+</body>
+</html>
