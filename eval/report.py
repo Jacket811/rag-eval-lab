@@ -137,6 +137,16 @@ body{margin:0;background:var(--bg);color:var(--t1);padding:28px 20px 80px;
 .wrap{max-width:980px;margin:0 auto}
 h1{font-size:21px;font-weight:600;margin:0 0 3px}
 .sub{color:var(--t3);font-size:12px;margin-bottom:20px}
+.drop{border:1px dashed #CFCBC2;border-radius:12px;padding:16px 20px;margin-bottom:14px;
+  background:#FDFCFA;cursor:pointer;transition:.12s;display:flex;align-items:center;gap:12px}
+.drop:hover,.drop.over{border-color:var(--good);background:#F5FBF8}
+.drop .ic{font-size:18px;color:var(--t3);flex:none;width:26px;text-align:center}
+.drop .tx{flex:1;min-width:0}
+.drop .t1{font-size:13px;color:var(--t2)}
+.drop .t2{font-size:12px;color:var(--t3);margin-top:2px}
+.drop .clr{font-size:12px;color:var(--t3);border:1px solid var(--line);background:#fff;
+  border-radius:8px;padding:5px 11px;cursor:pointer;flex:none}
+.drop .clr:hover{border-color:#C9C5BA;color:var(--t1)}
 .picker{background:var(--card);border:1px solid var(--line);border-radius:12px;
   padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .picker label{font-size:12px;color:var(--t3)}
@@ -187,6 +197,16 @@ footer{text-align:center;color:var(--t3);font-size:12px;margin-top:26px}
 <div class="wrap">
   <h1>RAG 检索评估 · 前后对比</h1>
   <div class="sub" id="sub"></div>
+
+  <div class="drop" id="drop">
+    <div class="ic">↓</div>
+    <div class="tx">
+      <div class="t1" id="dropTitle">把 CSV 拖到这里，或点击选择</div>
+      <div class="t2" id="dropSub">支持 1 个（单轮）或 2 个（前后对比）；不拖就是看下面的示例数据</div>
+    </div>
+    <button class="clr" id="dropClear" style="display:none">恢复示例</button>
+  </div>
+  <input type="file" id="fileInput" accept=".csv,text/csv" multiple style="display:none">
 
   <div class="picker">
     <label for="selA">对比基准</label>
@@ -246,12 +266,92 @@ footer{text-align:center;color:var(--t3);font-size:12px;margin-top:26px}
 
 <script>
 const D = __DATA__;
-const R = D.rounds;
+const $ = id => document.getElementById(id);
+let R = D.rounds;
 const fmt = (x,n=3) => x == null ? "—" : Number(x).toFixed(n);
 const sgn = x => (x > 0 ? "+" : "") + x.toFixed(3);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 let iA = Math.max(0, R.length - 2), iB = R.length - 1, filter = "all", cur = null;
+const DEMO = JSON.parse(JSON.stringify(R));
+
+// 标准 CSV 解析：处理引号内的逗号、换行、双写引号
+function parseCSV(text){
+  const rows = [];
+  let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"'){
+        if (text[i+1] === '"'){ cell += '"'; i++; }
+        else q = false;
+      } else cell += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ","){ row.push(cell); cell = ""; }
+      else if (c === "\n"){ row.push(cell); rows.push(row); row = []; cell = ""; }
+      else if (c === "\r"){ /* skip */ }
+      else cell += c;
+    }
+  }
+  if (cell.length || row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r => r.length > 1);
+}
+
+function friendlyName(name){
+  const m = name.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})\d{2}-?(.*)$/);
+  if (!m) return name;
+  return `${m[2]}-${m[3]} ${m[4]}:${m[5]} · ${m[6] || "-"}`;
+}
+
+function computeSums(items){
+  const total = items.length;
+  const hit = items.reduce((a, i) => a + (i.hit || 0), 0);
+  const stable = items.filter(i => !i.flaky);
+  const cats = {};
+  for (const c of D.catOrder){
+    const sub = items.filter(i => i.cat === c);
+    if (!sub.length) continue;
+    const h = sub.reduce((a, i) => a + (i.hit || 0), 0);
+    cats[c] = {n: sub.length, hit: h, rate: Math.round(1000 * h / sub.length) / 10};
+  }
+  return {
+    total, hit, rate: total ? Math.round(1000 * hit / total) / 10 : 0,
+    stable_total: stable.length,
+    stable_rate: stable.length ? Math.round(1000 * stable.reduce((a,i)=>a+(i.hit||0),0) / stable.length) / 10 : 0,
+    cats
+  };
+}
+
+function csvToRound(name, text){
+  const rows = parseCSV(text.replace(/^\ufeff/, ""));
+  if (rows.length < 2) return null;
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const idx = k => head.indexOf(k);
+  const iId = idx("id"), iCat = idx("cat"), iQ = idx("q"), iW3 = idx("w3"),
+        iT1 = idx("top1"), iHit = idx("hit"), iSeg = idx("segments"),
+        iDiff = idx("difficulty"), iFlaky = idx("flaky");
+  if (iId < 0 || iW3 < 0) return null;
+
+  const items = [];
+  for (const r of rows.slice(1)){
+    const id = parseInt(r[iId], 10);
+    if (Number.isNaN(id)) continue;
+    items.push({
+      id,
+      cat: (r[iCat] || "").trim(),
+      q: (r[iQ] || "").trim(),
+      w3: parseFloat(r[iW3]) || 0,
+      top1: iT1 >= 0 ? (parseFloat(r[iT1]) || 0) : 0,
+      hit: iHit >= 0 ? (parseInt(r[iHit], 10) || 0) : 0,
+      seg: iSeg >= 0 ? (parseInt(r[iSeg], 10) || 0) : 0,
+      diff: iDiff >= 0 ? r[iDiff] : "",
+      flaky: iFlaky >= 0 ? (parseInt(r[iFlaky], 10) || 0) : 0
+    });
+  }
+  if (!items.length) return null;
+  return {name, label: friendlyName(name), items, sums: computeSums(items), meta: null};
+}
 
 function label(r){ return r.label; }
 
@@ -467,14 +567,67 @@ window.addEventListener("hashchange", () => {
   renderAll(true);
 });
 
+async function handleFiles(fileList){
+  const files = [...fileList].filter(f => /\.csv$/i.test(f.name)).slice(0, 2);
+  if (!files.length){ return; }
+  const rounds = [];
+  for (const f of files){
+    let text = "";
+    try { text = await f.text(); } catch(e){ continue; }
+    const r = csvToRound(f.name.replace(/\.csv$/i, ""), text);
+    if (r) rounds.push(r);
+  }
+  if (!rounds.length){
+    $("dropSub").textContent = "解析失败：CSV 里需要有 id 和 w3 两列（本项目的 run_eval.py 输出的格式）";
+    return;
+  }
+  rounds.sort((a, b) => a.name.localeCompare(b.name));
+  R = rounds;
+  $("dropTitle").textContent = `已载入 ${rounds.length} 轮数据`;
+  $("dropSub").textContent = rounds.map(r => r.name).join("　·　");
+  $("dropClear").style.display = "block";
+  rebuild();
+}
+
+function restoreDemo(){
+  R = JSON.parse(JSON.stringify(DEMO));
+  R.forEach(r => { if (!r.label) r.label = r.name; });
+  $("dropTitle").textContent = "把 CSV 拖到这里，或点击选择";
+  $("dropSub").textContent = "支持 1 个（单轮）或 2 个（前后对比）；不拖就是看下面的示例数据";
+  $("dropClear").style.display = "none";
+  rebuild();
+}
+
+function rebuild(){
+  iA = Math.max(0, R.length - 2); iB = R.length - 1;
+  document.getElementById("sub").textContent =
+    `${R.length} 轮数据　·　${R === DEMO || R.length !== DEMO.length ? "来自你拖入的文件" : "自带示例"}`;
+  initSelects();
+  renderAll();
+}
+
+function bindDrop(){
+  const dz = $("drop");
+  dz.addEventListener("click", e => { if (e.target.id !== "dropClear") $("fileInput").click(); });
+  dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); });
+  dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+  dz.addEventListener("drop", e => {
+    e.preventDefault(); dz.classList.remove("over");
+    if (e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  });
+  $("fileInput").addEventListener("change", e => {
+    if (e.target.files && e.target.files.length) handleFiles(e.target.files);
+  });
+  $("dropClear").addEventListener("click", e => { e.stopPropagation(); restoreDemo(); });
+}
+
 function boot(){
   R.forEach(r => { if (!r.label) r.label = r.name; });
   const m = location.hash.match(/^#(\d+)-(\d+)$/);
   if (m && +m[1] < R.length && +m[2] < R.length){ iA = +m[1]; iB = +m[2]; }
-  document.getElementById("sub").textContent =
-    `${R.length} 轮历史数据　·　生成于 ${D.built}`;
   document.getElementById("foot").textContent =
     "由 eval/report.py 生成　·　数据源 eval/results/*.csv";
+  bindDrop();
   initSelects(); renderAll();
 }
 boot();

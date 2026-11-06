@@ -210,6 +210,9 @@ python report.py --open   # 生成后自动打开浏览器
 
 **零外部依赖**（内联 SVG，不加载任何 CDN），离线可开，也可以直接放到 GitHub Pages。
 
+**别人不用装任何东西也能看**：页面上方有拖放区，把 CSV 拖进去就直接出图——
+不用 Python、不用 Docker、不用改配置。发一个 `xxx.csv` 给对方，他拖进网页就能看到同样的散点图和分类对比。
+
 生成的报告长什么样：见 [eval/report.html](eval/report.html)（下载后用浏览器打开）
 
 题库分四类，各 12-13 题：
