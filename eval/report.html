@@ -3,43 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RAG 检索评估报告</title>
+<title>RAG 检索评估 · 前后对比</title>
 <style>
 :root{
-  --bg:#FBFAF7; --card:#FFFFFF; --line:#E5E2DA;
-  --t1:#1F1E1B; --t2:#5F5E5A; --t3:#8C8A83;
-  --good:#1D9E75; --bad:#C0492A; --gray:#888780;
-  --good-bg:#E1F5EE; --bad-bg:#FAECE7;
+  --bg:#FBFAF7;--card:#FFF;--line:#E5E2DA;--t1:#1F1E1B;--t2:#5F5E5A;--t3:#8C8A83;
+  --good:#1D9E75;--bad:#C0492A;--gray:#888780;
+  --good-bg:#E1F5EE;--bad-bg:#FAECE7;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t1);
-  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  padding:32px 20px 80px}
+body{margin:0;background:var(--bg);color:var(--t1);padding:28px 20px 80px;
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
 .wrap{max-width:980px;margin:0 auto}
-h1{font-size:22px;font-weight:600;margin:0 0 4px}
-.sub{color:var(--t3);font-size:13px;margin-bottom:28px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-bottom:18px}
-h2{font-size:15px;font-weight:600;margin:0 0 4px}
-.hint{color:var(--t3);font-size:12px;margin:0 0 18px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-.kpi .k{font-size:12px;color:var(--t3);margin-bottom:6px}
-.kpi .v{font-size:26px;font-weight:600;letter-spacing:-.5px}
-.kpi .d{font-size:12px;margin-top:4px}
-.up{color:var(--good)} .down{color:var(--bad)} .flat{color:var(--t3)}
-.bar-row{display:grid;grid-template-columns:88px 1fr 132px;align-items:center;gap:12px;margin-bottom:10px}
+h1{font-size:21px;font-weight:600;margin:0 0 3px}
+.sub{color:var(--t3);font-size:12px;margin-bottom:20px}
+.picker{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.picker label{font-size:12px;color:var(--t3)}
+select{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--t1);max-width:290px;cursor:pointer}
+select:focus{outline:2px solid #CFCBC2;outline-offset:1px}
+.swap{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;
+  font-size:13px;cursor:pointer;color:var(--t2)}
+.swap:hover{border-color:#C9C5BA}
+.picker .note{margin-left:auto;font-size:12px;color:var(--t3)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+h2{font-size:15px;font-weight:600;margin:0 0 3px}
+.hint{color:var(--t3);font-size:12px;margin:0 0 16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.kpi .k{font-size:12px;color:var(--t3);margin-bottom:5px}
+.kpi .v{font-size:25px;font-weight:600;letter-spacing:-.5px}
+.kpi .d{font-size:12px;margin-top:3px}
+.up{color:var(--good)}.down{color:var(--bad)}.flat{color:var(--t3)}
+.bar-row{display:grid;grid-template-columns:92px 1fr 138px;align-items:center;gap:12px;margin-bottom:11px}
 .bar-name{font-size:13px;color:var(--t2)}
-.bar-track{position:relative;height:22px;background:#F3F1EC;border-radius:4px;overflow:hidden}
+.bar-val{font-size:12px;text-align:right;color:var(--t2);font-variant-numeric:tabular-nums}
 .pair{display:flex;flex-direction:column;gap:3px}
 .pair .tr{position:relative;height:8px;background:#F3F1EC;border-radius:3px;overflow:hidden}
 .pair .fl{position:absolute;left:0;top:0;height:100%;border-radius:3px}
-.bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px}
-.bar-val{font-size:12px;text-align:right;color:var(--t2);font-variant-numeric:tabular-nums}
 .legend{display:flex;gap:16px;font-size:12px;color:var(--t3);margin-bottom:14px}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
-.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 13px;font-size:12px;
-  cursor:pointer;color:var(--t2)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 13px;
+  font-size:12px;cursor:pointer;color:var(--t2)}
 .chip:hover{border-color:#C9C5BA}
 .chip.on{background:var(--t1);border-color:var(--t1);color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -47,42 +53,51 @@ th{text-align:left;font-weight:500;color:var(--t3);font-size:12px;padding:8px 10
 td{padding:8px 10px;border-bottom:1px solid #F2F0EB;vertical-align:top}
 tr:hover td{background:#FCFBF8}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;background:#F3F1EC;color:var(--t2);white-space:nowrap}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;
+  background:#F3F1EC;color:var(--t2);white-space:nowrap}
 .tag.hit{background:var(--good-bg);color:#0F6E56}
 .tag.miss{background:var(--bad-bg);color:#993C1D}
-svg text{font-family:inherit}
-.scatter-note{font-size:12px;color:var(--t3);margin-top:10px}
-footer{text-align:center;color:var(--t3);font-size:12px;margin-top:30px}
-@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.bar-row{grid-template-columns:66px 1fr 78px}}
+footer{text-align:center;color:var(--t3);font-size:12px;margin-top:26px}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}
+  .bar-row{grid-template-columns:70px 1fr 104px}.picker .note{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>RAG 检索层评估报告</h1>
-  <div class="sub" id="meta"></div>
+  <h1>RAG 检索评估 · 前后对比</h1>
+  <div class="sub" id="sub"></div>
+
+  <div class="picker">
+    <label for="selA">对比基准</label>
+    <select id="selA"></select>
+    <label for="selB">当前</label>
+    <select id="selB"></select>
+    <button class="swap" id="swapBtn">交换</button>
+    <span class="note" id="note"></span>
+  </div>
 
   <div class="kpis" id="kpis"></div>
 
   <div class="card">
     <h2>分类命中率</h2>
-    <p class="hint">每类通过率。上行灰色＝改动前，下行彩色＝改动后。样本少于 5 题的类别结论不可靠。</p>
+    <p class="hint">上行灰色＝对比基准，下行彩色＝当前。样本少于 5 题的类别结论不可靠。</p>
     <div class="legend">
-      <span><i style="background:#CFCBC2"></i>上行：改动前</span>
-      <span><i style="background:#1D9E75"></i>下行：改动后（变差为红）</span>
+      <span><i style="background:#CFCBC2"></i>基准</span>
+      <span><i style="background:#1D9E75"></i>当前（变差为红，无变化为浅绿）</span>
     </div>
     <div id="cats"></div>
   </div>
 
   <div class="card">
     <h2>逐题变化散点</h2>
-    <p class="hint">横轴改前分数，纵轴改后分数。落在对角线上＝没变；越往左上＝提升越大，右下＝退步。</p>
+    <p class="hint">横轴基准分数，纵轴当前分数。落虚线＝没变；越往左上提升越大，右下退步。</p>
     <div id="scatter"></div>
-    <div class="scatter-note" id="scatterNote"></div>
+    <div class="hint" id="scatterNote" style="margin:10px 0 0"></div>
   </div>
 
   <div class="card">
     <h2>提升与退步最大的题</h2>
-    <p class="hint">按前三段加权分（w3）的变化排序，阈值 ±0.02（与 run_eval.py --diff 一致）。</p>
+    <p class="hint">按前三段加权分（w3）排序，阈值 ±0.02（与 run_eval.py --diff 一致）。</p>
     <div id="movers"></div>
   </div>
 
@@ -90,13 +105,11 @@ footer{text-align:center;color:var(--t3);font-size:12px;margin-top:30px}
     <h2>全部题目</h2>
     <div class="tools" id="filters"></div>
     <table>
-      <thead>
-        <tr>
-          <th style="width:44px">#</th><th style="width:76px">类别</th><th>问题</th>
-          <th class="num" style="width:66px">改前</th><th class="num" style="width:66px">改后</th>
-          <th class="num" style="width:64px">变化</th><th style="width:70px">结果</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th style="width:44px">#</th><th style="width:78px">类别</th><th>问题</th>
+        <th class="num" style="width:66px">基准</th><th class="num" style="width:66px">当前</th>
+        <th class="num" style="width:64px">变化</th><th style="width:72px">结果</th>
+      </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
@@ -105,143 +118,182 @@ footer{text-align:center;color:var(--t3);font-size:12px;margin-top:30px}
 </div>
 
 <script>
-const D = {"items": [{"id": 1, "cat": "oral", "q": "电脑连不上网了，网卡好像没起来", "w3a": 0.797, "w3b": 0.801, "hita": 1, "hitb": 1, "top1a": 0.982, "top1b": 0.981, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 2, "cat": "oral", "q": "桌面图标全没了怎么找回来", "w3a": 0.879, "w3b": 0.839, "hita": 1, "hitb": 1, "top1a": 0.938, "top1b": 0.905, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 3, "cat": "oral", "q": "输入法切不出来只能打英文", "w3a": 0.804, "w3b": 0.817, "hita": 1, "hitb": 1, "top1a": 0.991, "top1b": 0.992, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 4, "cat": "oral", "q": "系统没声音了，音量图标是灰的", "w3a": 0.32, "w3b": 0.293, "hita": 1, "hitb": 1, "top1a": 0.484, "top1b": 0.435, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 5, "cat": "oral", "q": "打印机加了没反应，列表里看不到", "w3a": 0.39, "w3b": 0.477, "hita": 1, "hitb": 1, "top1a": 0.431, "top1b": 0.547, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 6, "cat": "oral", "q": "U盘插上没反应，桌面不显示", "w3a": 0.501, "w3b": 0.529, "hita": 1, "hitb": 1, "top1a": 0.659, "top1b": 0.724, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 7, "cat": "oral", "q": "软件商店打不开一直转圈", "w3a": 0.745, "w3b": 0.907, "hita": 1, "hitb": 1, "top1a": 0.781, "top1b": 0.968, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 8, "cat": "oral", "q": "屏幕分辨率不对，字特别大", "w3a": 0.505, "w3b": 0.892, "hita": 1, "hitb": 1, "top1a": 0.624, "top1b": 0.981, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 9, "cat": "oral", "q": "装完双系统进不去麒麟，直接进 Windows", "w3a": 0.828, "w3b": 0.953, "hita": 1, "hitb": 1, "top1a": 0.953, "top1b": 0.996, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 10, "cat": "oral", "q": "忘记登录密码进不去系统怎么办", "w3a": 0.873, "w3b": 0.836, "hita": 1, "hitb": 1, "top1a": 0.94, "top1b": 0.926, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 11, "cat": "oral", "q": "蓝牙耳机连不上电脑", "w3a": 0.488, "w3b": 0.47, "hita": 1, "hitb": 1, "top1a": 0.611, "top1b": 0.563, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 12, "cat": "oral", "q": "电脑开机特别慢怎么优化", "w3a": 0.445, "w3b": 0.442, "hita": 0, "hitb": 0, "top1a": 0.495, "top1b": 0.483, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 13, "cat": "oral", "q": "触摸板不工作，鼠标能用一个", "w3a": 0.172, "w3b": 0.198, "hita": 0, "hitb": 0, "top1a": 0.345, "top1b": 0.396, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 14, "cat": "term", "q": "错误码0009怎么解决", "w3a": 0.431, "w3b": 0.44, "hita": 1, "hitb": 1, "top1a": 0.863, "top1b": 0.88, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 15, "cat": "term", "q": "r8168-dkms 怎么卸载", "w3a": 0.707, "w3b": 0.724, "hita": 1, "hitb": 1, "top1a": 0.973, "top1b": 0.976, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 16, "cat": "term", "q": "nmcli 怎么配置静态 IP", "w3a": 0.992, "w3b": 0.994, "hita": 1, "hitb": 1, "top1a": 0.994, "top1b": 0.995, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 17, "cat": "term", "q": "怎么安装 deb 包", "w3a": 0.99, "w3b": 0.99, "hita": 1, "hitb": 1, "top1a": 0.994, "top1b": 0.994, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 18, "cat": "term", "q": "怎么查看系统版本和内核版本", "w3a": 0.988, "w3b": 0.989, "hita": 1, "hitb": 1, "top1a": 0.99, "top1b": 0.989, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 19, "cat": "term", "q": "时间同步失败怎么办", "w3a": 0.858, "w3b": 0.857, "hita": 1, "hitb": 1, "top1a": 0.944, "top1b": 0.957, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 20, "cat": "term", "q": "怎么查看磁盘空间占用", "w3a": 0.971, "w3b": 0.973, "hita": 1, "hitb": 1, "top1a": 0.973, "top1b": 0.978, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 21, "cat": "term", "q": "如何查看网卡驱动版本", "w3a": 0.981, "w3b": 0.978, "hita": 1, "hitb": 1, "top1a": 0.995, "top1b": 0.995, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 22, "cat": "term", "q": "systemctl 怎么设置服务开机自启", "w3a": 0.98, "w3b": 0.983, "hita": 1, "hitb": 1, "top1a": 0.988, "top1b": 0.993, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 23, "cat": "term", "q": "怎么创建新用户", "w3a": 0.848, "w3b": 0.856, "hita": 1, "hitb": 1, "top1a": 0.998, "top1b": 0.999, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 24, "cat": "term", "q": "远程桌面连不上", "w3a": 0.753, "w3b": 0.769, "hita": 1, "hitb": 1, "top1a": 0.764, "top1b": 0.797, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 25, "cat": "term", "q": "如何修改主机名", "w3a": 0.437, "w3b": 0.408, "hita": 1, "hitb": 1, "top1a": 0.494, "top1b": 0.435, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 26, "cat": "multi", "q": "系统升级后网卡不加载，是不是驱动问题", "w3a": 0.865, "w3b": 0.895, "hita": 1, "hitb": 1, "top1a": 0.991, "top1b": 0.989, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 27, "cat": "multi", "q": "系统盘满了导致软件商店打不开怎么办", "w3a": 0.65, "w3b": 0.696, "hita": 1, "hitb": 1, "top1a": 0.659, "top1b": 0.76, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 28, "cat": "multi", "q": "双系统装完进不去麒麟，怎么修复引导", "w3a": 0.779, "w3b": 0.921, "hita": 1, "hitb": 1, "top1a": 0.897, "top1b": 0.976, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 29, "cat": "multi", "q": "输入法卡死而且任务栏状态栏也没了", "w3a": 0.563, "w3b": 0.599, "hita": 1, "hitb": 1, "top1a": 0.606, "top1b": 0.718, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 30, "cat": "multi", "q": "忘记密码但又想保留数据，怎么重置", "w3a": 0.756, "w3b": 0.755, "hita": 1, "hitb": 1, "top1a": 0.974, "top1b": 0.974, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 31, "cat": "multi", "q": "U盘不识别，换到另一台机器也一样", "w3a": 0.616, "w3b": 0.617, "hita": 1, "hitb": 1, "top1a": 0.772, "top1b": 0.734, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 32, "cat": "multi", "q": "打印机驱动装了但打出来是乱码", "w3a": 0.462, "w3b": 0.49, "hita": 1, "hitb": 1, "top1a": 0.572, "top1b": 0.622, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 33, "cat": "multi", "q": "装了显卡驱动之后黑屏怎么恢复", "w3a": 0.266, "w3b": 0.274, "hita": 1, "hitb": 1, "top1a": 0.344, "top1b": 0.351, "seg": 2, "diff": "mid", "flaky": 0}, {"id": 34, "cat": "multi", "q": "系统时间不对导致网页证书报错", "w3a": 0.0, "w3b": 0.0, "hita": 0, "hitb": 0, "top1a": 0.0, "top1b": 0.0, "seg": 0, "diff": "mid", "flaky": 1}, {"id": 35, "cat": "multi", "q": "麒麟系统怎么用 Windows 共享的打印机", "w3a": 0.973, "w3b": 0.974, "hita": 1, "hitb": 1, "top1a": 0.979, "top1b": 0.976, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 36, "cat": "multi", "q": "远程桌面连上后黑屏", "w3a": 0.678, "w3b": 0.634, "hita": 1, "hitb": 1, "top1a": 0.723, "top1b": 0.745, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 37, "cat": "multi", "q": "升级系统后 SSH 连不上服务器", "w3a": 0.875, "w3b": 0.877, "hita": 1, "hitb": 1, "top1a": 0.997, "top1b": 0.996, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 38, "cat": "multi", "q": "分辨率改了回不去，显示器不被识别", "w3a": 0.524, "w3b": 0.576, "hita": 1, "hitb": 1, "top1a": 0.679, "top1b": 0.771, "seg": 3, "diff": "mid", "flaky": 0}, {"id": 39, "cat": "noans", "q": "麒麟系统怎么部署 Kubernetes 集群", "w3a": 0.261, "w3b": 0.218, "hita": 0, "hitb": 1, "top1a": 0.522, "top1b": 0.436, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 40, "cat": "noans", "q": "怎么在麒麟上安装 CUDA 12 驱动", "w3a": 0.33, "w3b": 0.344, "hita": 1, "hitb": 1, "top1a": 0.368, "top1b": 0.38, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 41, "cat": "noans", "q": "Ansible 如何批量管理麒麟服务器", "w3a": 0.197, "w3b": 0.246, "hita": 1, "hitb": 1, "top1a": 0.394, "top1b": 0.492, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 42, "cat": "noans", "q": "麒麟怎么配置 Redis 集群", "w3a": 0.076, "w3b": 0.0, "hita": 1, "hitb": 1, "top1a": 0.152, "top1b": 0.0, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 43, "cat": "noans", "q": "如何把 GPU 直通给虚拟机使用", "w3a": 0.0, "w3b": 0.0, "hita": 1, "hitb": 1, "top1a": 0.0, "top1b": 0.0, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 44, "cat": "noans", "q": "麒麟支持 Docker Swarm 吗", "w3a": 0.789, "w3b": 0.78, "hita": 0, "hitb": 0, "top1a": 0.918, "top1b": 0.875, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 45, "cat": "noans", "q": "怎么把系统数据同步到对象存储", "w3a": 0.0, "w3b": 0.0, "hita": 1, "hitb": 1, "top1a": 0.0, "top1b": 0.0, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 46, "cat": "noans", "q": "如何编译一个内核模块", "w3a": 0.119, "w3b": 0.142, "hita": 1, "hitb": 1, "top1a": 0.237, "top1b": 0.285, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 47, "cat": "noans", "q": "有没有麒麟手机端的客户端", "w3a": 0.134, "w3b": 0.108, "hita": 1, "hitb": 1, "top1a": 0.174, "top1b": 0.217, "seg": 2, "diff": "hard", "flaky": 0}, {"id": 48, "cat": "noans", "q": "kubectl 连不上集群怎么排查", "w3a": 0.0, "w3b": 0.0, "hita": 1, "hitb": 1, "top1a": 0.0, "top1b": 0.0, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 49, "cat": "noans", "q": "麒麟怎么配置 nginx 反向代理", "w3a": 0.0, "w3b": 0.083, "hita": 1, "hitb": 1, "top1a": 0.0, "top1b": 0.166, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 50, "cat": "noans", "q": "用 vfio 绑定显卡给 KVM 虚拟机", "w3a": 0.198, "w3b": 0.219, "hita": 1, "hitb": 1, "top1a": 0.396, "top1b": 0.438, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 51, "cat": "exact", "q": "软件商店卸载软件报错0004怎么办", "w3a": 0.883, "w3b": 0.962, "hita": 1, "hitb": 1, "top1a": 0.998, "top1b": 0.998, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 52, "cat": "exact", "q": "软件商店下载提示网络错误0006", "w3a": 0.905, "w3b": 0.951, "hita": 1, "hitb": 1, "top1a": 0.998, "top1b": 0.998, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 53, "cat": "exact", "q": "软件商店提示空间不足错误码0007", "w3a": 0.992, "w3b": 0.994, "hita": 1, "hitb": 1, "top1a": 0.999, "top1b": 0.999, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 54, "cat": "exact", "q": "长城TN140A2笔记本指纹用不了", "w3a": 0.717, "w3b": 0.684, "hita": 1, "hitb": 1, "top1a": 0.986, "top1b": 0.986, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 55, "cat": "exact", "q": "RTL8111 网卡用什么驱动", "w3a": 0.548, "w3b": 0.566, "hita": 1, "hitb": 1, "top1a": 0.705, "top1b": 0.699, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 56, "cat": "exact", "q": "ifcfg 文件里 BOOTPROTO 该设成什么", "w3a": 0.458, "w3b": 0.46, "hita": 1, "hitb": 1, "top1a": 0.916, "top1b": 0.92, "seg": 1, "diff": "mid", "flaky": 0}, {"id": 57, "cat": "syn", "q": "上不了网，ifconfig 看不到网卡", "w3a": 0.743, "w3b": 0.889, "hita": 0, "hitb": 1, "top1a": 0.827, "top1b": 0.943, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 58, "cat": "syn", "q": "桌面上的东西全没了", "w3a": 0.524, "w3b": 0.524, "hita": 1, "hitb": 1, "top1a": 0.736, "top1b": 0.746, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 59, "cat": "syn", "q": "打不出中文只能打英文", "w3a": 0.863, "w3b": 0.861, "hita": 1, "hitb": 1, "top1a": 0.945, "top1b": 0.938, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 60, "cat": "syn", "q": "右下角喇叭图标灰的点不动", "w3a": 0.212, "w3b": 0.19, "hita": 1, "hitb": 1, "top1a": 0.424, "top1b": 0.38, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 61, "cat": "syn", "q": "插了U盘桌面没反应", "w3a": 0.779, "w3b": 0.802, "hita": 1, "hitb": 1, "top1a": 0.935, "top1b": 0.949, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 62, "cat": "syn", "q": "应用商店一直转圈进不去", "w3a": 0.312, "w3b": 0.751, "hita": 0, "hitb": 1, "top1a": 0.32, "top1b": 0.896, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 63, "cat": "syn", "q": "屏幕上的字特别大改不小", "w3a": 0.353, "w3b": 0.852, "hita": 0, "hitb": 1, "top1a": 0.509, "top1b": 0.963, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 64, "cat": "syn", "q": "开机直接进 Windows 了", "w3a": 0.288, "w3b": 0.728, "hita": 0, "hitb": 1, "top1a": 0.318, "top1b": 0.832, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 65, "cat": "cond", "q": "没网的情况下怎么安装 deb 包", "w3a": 0.91, "w3b": 0.908, "hita": 1, "hitb": 1, "top1a": 0.982, "top1b": 0.985, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 66, "cat": "cond", "q": "U盘能识别但打不开提示没有权限", "w3a": 0.398, "w3b": 0.366, "hita": 0, "hitb": 0, "top1a": 0.419, "top1b": 0.386, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 67, "cat": "cond", "q": "电脑能上网但网页打不开", "w3a": 0.428, "w3b": 0.412, "hita": 0, "hitb": 0, "top1a": 0.466, "top1b": 0.417, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 68, "cat": "noans", "q": "ifcfg 里的 NM_CONTROLLED 参数是干什么的", "w3a": 0.0, "w3b": 0.0, "hita": 1, "hitb": 1, "top1a": 0.0, "top1b": 0.0, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 69, "cat": "noans", "q": "麒麟系统支持 Podman 吗", "w3a": 0.288, "w3b": 0.292, "hita": 1, "hitb": 1, "top1a": 0.336, "top1b": 0.366, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 70, "cat": "noans", "q": "怎么在麒麟上用 Flatpak 安装软件", "w3a": 0.733, "w3b": 0.741, "hita": 0, "hitb": 0, "top1a": 0.766, "top1b": 0.788, "seg": 4, "diff": "hard", "flaky": 0}], "a": {"total": 70, "hit": 58, "rate": 82.9, "stable_total": 69, "stable_rate": 84.1, "cats": {"oral": {"n": 13, "hit": 11, "rate": 84.6}, "term": {"n": 12, "hit": 12, "rate": 100.0}, "multi": {"n": 13, "hit": 12, "rate": 92.3}, "syn": {"n": 8, "hit": 4, "rate": 50.0}, "exact": {"n": 6, "hit": 6, "rate": 100.0}, "cond": {"n": 3, "hit": 1, "rate": 33.3}, "noans": {"n": 15, "hit": 12, "rate": 80.0}}}, "b": {"total": 70, "hit": 63, "rate": 90.0, "stable_total": 69, "stable_rate": 91.3, "cats": {"oral": {"n": 13, "hit": 11, "rate": 84.6}, "term": {"n": 12, "hit": 12, "rate": 100.0}, "multi": {"n": 13, "hit": 12, "rate": 92.3}, "syn": {"n": 8, "hit": 8, "rate": 100.0}, "exact": {"n": 6, "hit": 6, "rate": 100.0}, "cond": {"n": 3, "hit": 1, "rate": 33.3}, "noans": {"n": 15, "hit": 13, "rate": 86.7}}}, "catName": {"oral": "口语", "term": "术语", "multi": "多跳", "noans": "无答案", "exact": "精确型", "syn": "同义变体", "cond": "带条件"}, "catOrder": ["oral", "term", "multi", "syn", "exact", "cond", "noans"], "meta": {"line": "20261106-130559-v2-70q　→　20261106-133117-after-alias", "foot": "由 report.py 生成于 2026-11-06 14:25　·　数据源 eval/results/"}};
-const A = D.a, B = D.b, items = D.items;
-const hasB = B && B.total > 0;
-
-const fmt = (x, n=3) => x == null ? "—" : Number(x).toFixed(n);
+const D = {"rounds": [{"name": "20261106-130559-v2-70q", "items": [{"id": 1, "cat": "oral", "q": "电脑连不上网了，网卡好像没起来", "w3": 0.797, "top1": 0.982, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 2, "cat": "oral", "q": "桌面图标全没了怎么找回来", "w3": 0.879, "top1": 0.938, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 3, "cat": "oral", "q": "输入法切不出来只能打英文", "w3": 0.804, "top1": 0.991, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 4, "cat": "oral", "q": "系统没声音了，音量图标是灰的", "w3": 0.32, "top1": 0.484, "hit": 1, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 5, "cat": "oral", "q": "打印机加了没反应，列表里看不到", "w3": 0.39, "top1": 0.431, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 6, "cat": "oral", "q": "U盘插上没反应，桌面不显示", "w3": 0.501, "top1": 0.659, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 7, "cat": "oral", "q": "软件商店打不开一直转圈", "w3": 0.745, "top1": 0.781, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 8, "cat": "oral", "q": "屏幕分辨率不对，字特别大", "w3": 0.505, "top1": 0.624, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 9, "cat": "oral", "q": "装完双系统进不去麒麟，直接进 Windows", "w3": 0.828, "top1": 0.953, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 10, "cat": "oral", "q": "忘记登录密码进不去系统怎么办", "w3": 0.873, "top1": 0.94, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 11, "cat": "oral", "q": "蓝牙耳机连不上电脑", "w3": 0.488, "top1": 0.611, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 12, "cat": "oral", "q": "电脑开机特别慢怎么优化", "w3": 0.445, "top1": 0.495, "hit": 0, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 13, "cat": "oral", "q": "触摸板不工作，鼠标能用一个", "w3": 0.172, "top1": 0.345, "hit": 0, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 14, "cat": "term", "q": "错误码0009怎么解决", "w3": 0.431, "top1": 0.863, "hit": 1, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 15, "cat": "term", "q": "r8168-dkms 怎么卸载", "w3": 0.707, "top1": 0.973, "hit": 1, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 16, "cat": "term", "q": "nmcli 怎么配置静态 IP", "w3": 0.992, "top1": 0.994, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 17, "cat": "term", "q": "怎么安装 deb 包", "w3": 0.99, "top1": 0.994, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 18, "cat": "term", "q": "怎么查看系统版本和内核版本", "w3": 0.988, "top1": 0.99, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 19, "cat": "term", "q": "时间同步失败怎么办", "w3": 0.858, "top1": 0.944, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 20, "cat": "term", "q": "怎么查看磁盘空间占用", "w3": 0.971, "top1": 0.973, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 21, "cat": "term", "q": "如何查看网卡驱动版本", "w3": 0.981, "top1": 0.995, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 22, "cat": "term", "q": "systemctl 怎么设置服务开机自启", "w3": 0.98, "top1": 0.988, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 23, "cat": "term", "q": "怎么创建新用户", "w3": 0.848, "top1": 0.998, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 24, "cat": "term", "q": "远程桌面连不上", "w3": 0.753, "top1": 0.764, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 25, "cat": "term", "q": "如何修改主机名", "w3": 0.437, "top1": 0.494, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 26, "cat": "multi", "q": "系统升级后网卡不加载，是不是驱动问题", "w3": 0.865, "top1": 0.991, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 27, "cat": "multi", "q": "系统盘满了导致软件商店打不开怎么办", "w3": 0.65, "top1": 0.659, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 28, "cat": "multi", "q": "双系统装完进不去麒麟，怎么修复引导", "w3": 0.779, "top1": 0.897, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 29, "cat": "multi", "q": "输入法卡死而且任务栏状态栏也没了", "w3": 0.563, "top1": 0.606, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 30, "cat": "multi", "q": "忘记密码但又想保留数据，怎么重置", "w3": 0.756, "top1": 0.974, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 31, "cat": "multi", "q": "U盘不识别，换到另一台机器也一样", "w3": 0.616, "top1": 0.772, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 32, "cat": "multi", "q": "打印机驱动装了但打出来是乱码", "w3": 0.462, "top1": 0.572, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 33, "cat": "multi", "q": "装了显卡驱动之后黑屏怎么恢复", "w3": 0.266, "top1": 0.344, "hit": 1, "seg": 2, "diff": "mid", "flaky": 0}, {"id": 34, "cat": "multi", "q": "系统时间不对导致网页证书报错", "w3": 0.0, "top1": 0.0, "hit": 0, "seg": 0, "diff": "mid", "flaky": 1}, {"id": 35, "cat": "multi", "q": "麒麟系统怎么用 Windows 共享的打印机", "w3": 0.973, "top1": 0.979, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 36, "cat": "multi", "q": "远程桌面连上后黑屏", "w3": 0.678, "top1": 0.723, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 37, "cat": "multi", "q": "升级系统后 SSH 连不上服务器", "w3": 0.875, "top1": 0.997, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 38, "cat": "multi", "q": "分辨率改了回不去，显示器不被识别", "w3": 0.524, "top1": 0.679, "hit": 1, "seg": 3, "diff": "mid", "flaky": 0}, {"id": 39, "cat": "noans", "q": "麒麟系统怎么部署 Kubernetes 集群", "w3": 0.261, "top1": 0.522, "hit": 0, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 40, "cat": "noans", "q": "怎么在麒麟上安装 CUDA 12 驱动", "w3": 0.33, "top1": 0.368, "hit": 1, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 41, "cat": "noans", "q": "Ansible 如何批量管理麒麟服务器", "w3": 0.197, "top1": 0.394, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 42, "cat": "noans", "q": "麒麟怎么配置 Redis 集群", "w3": 0.076, "top1": 0.152, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 43, "cat": "noans", "q": "如何把 GPU 直通给虚拟机使用", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 44, "cat": "noans", "q": "麒麟支持 Docker Swarm 吗", "w3": 0.789, "top1": 0.918, "hit": 0, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 45, "cat": "noans", "q": "怎么把系统数据同步到对象存储", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 46, "cat": "noans", "q": "如何编译一个内核模块", "w3": 0.119, "top1": 0.237, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 47, "cat": "noans", "q": "有没有麒麟手机端的客户端", "w3": 0.134, "top1": 0.174, "hit": 1, "seg": 2, "diff": "hard", "flaky": 0}, {"id": 48, "cat": "noans", "q": "kubectl 连不上集群怎么排查", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 49, "cat": "noans", "q": "麒麟怎么配置 nginx 反向代理", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 50, "cat": "noans", "q": "用 vfio 绑定显卡给 KVM 虚拟机", "w3": 0.198, "top1": 0.396, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 51, "cat": "exact", "q": "软件商店卸载软件报错0004怎么办", "w3": 0.883, "top1": 0.998, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 52, "cat": "exact", "q": "软件商店下载提示网络错误0006", "w3": 0.905, "top1": 0.998, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 53, "cat": "exact", "q": "软件商店提示空间不足错误码0007", "w3": 0.992, "top1": 0.999, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 54, "cat": "exact", "q": "长城TN140A2笔记本指纹用不了", "w3": 0.717, "top1": 0.986, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 55, "cat": "exact", "q": "RTL8111 网卡用什么驱动", "w3": 0.548, "top1": 0.705, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 56, "cat": "exact", "q": "ifcfg 文件里 BOOTPROTO 该设成什么", "w3": 0.458, "top1": 0.916, "hit": 1, "seg": 1, "diff": "mid", "flaky": 0}, {"id": 57, "cat": "syn", "q": "上不了网，ifconfig 看不到网卡", "w3": 0.743, "top1": 0.827, "hit": 0, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 58, "cat": "syn", "q": "桌面上的东西全没了", "w3": 0.524, "top1": 0.736, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 59, "cat": "syn", "q": "打不出中文只能打英文", "w3": 0.863, "top1": 0.945, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 60, "cat": "syn", "q": "右下角喇叭图标灰的点不动", "w3": 0.212, "top1": 0.424, "hit": 1, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 61, "cat": "syn", "q": "插了U盘桌面没反应", "w3": 0.779, "top1": 0.935, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 62, "cat": "syn", "q": "应用商店一直转圈进不去", "w3": 0.312, "top1": 0.32, "hit": 0, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 63, "cat": "syn", "q": "屏幕上的字特别大改不小", "w3": 0.353, "top1": 0.509, "hit": 0, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 64, "cat": "syn", "q": "开机直接进 Windows 了", "w3": 0.288, "top1": 0.318, "hit": 0, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 65, "cat": "cond", "q": "没网的情况下怎么安装 deb 包", "w3": 0.91, "top1": 0.982, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 66, "cat": "cond", "q": "U盘能识别但打不开提示没有权限", "w3": 0.398, "top1": 0.419, "hit": 0, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 67, "cat": "cond", "q": "电脑能上网但网页打不开", "w3": 0.428, "top1": 0.466, "hit": 0, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 68, "cat": "noans", "q": "ifcfg 里的 NM_CONTROLLED 参数是干什么的", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 69, "cat": "noans", "q": "麒麟系统支持 Podman 吗", "w3": 0.288, "top1": 0.336, "hit": 1, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 70, "cat": "noans", "q": "怎么在麒麟上用 Flatpak 安装软件", "w3": 0.733, "top1": 0.766, "hit": 0, "seg": 4, "diff": "hard", "flaky": 0}], "sums": {"total": 70, "hit": 58, "rate": 82.9, "stable_total": 69, "stable_rate": 84.1, "cats": {"oral": {"n": 13, "hit": 11, "rate": 84.6}, "term": {"n": 12, "hit": 12, "rate": 100.0}, "multi": {"n": 13, "hit": 12, "rate": 92.3}, "syn": {"n": 8, "hit": 4, "rate": 50.0}, "exact": {"n": 6, "hit": 6, "rate": 100.0}, "cond": {"n": 3, "hit": 1, "rate": 33.3}, "noans": {"n": 15, "hit": 12, "rate": 80.0}}}, "label": "11-06 13:05 · v2-70q"}, {"name": "20261106-133117-after-alias", "items": [{"id": 1, "cat": "oral", "q": "电脑连不上网了，网卡好像没起来", "w3": 0.801, "top1": 0.981, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 2, "cat": "oral", "q": "桌面图标全没了怎么找回来", "w3": 0.839, "top1": 0.905, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 3, "cat": "oral", "q": "输入法切不出来只能打英文", "w3": 0.817, "top1": 0.992, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 4, "cat": "oral", "q": "系统没声音了，音量图标是灰的", "w3": 0.293, "top1": 0.435, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 5, "cat": "oral", "q": "打印机加了没反应，列表里看不到", "w3": 0.477, "top1": 0.547, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 6, "cat": "oral", "q": "U盘插上没反应，桌面不显示", "w3": 0.529, "top1": 0.724, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 7, "cat": "oral", "q": "软件商店打不开一直转圈", "w3": 0.907, "top1": 0.968, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 8, "cat": "oral", "q": "屏幕分辨率不对，字特别大", "w3": 0.892, "top1": 0.981, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 9, "cat": "oral", "q": "装完双系统进不去麒麟，直接进 Windows", "w3": 0.953, "top1": 0.996, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 10, "cat": "oral", "q": "忘记登录密码进不去系统怎么办", "w3": 0.836, "top1": 0.926, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 11, "cat": "oral", "q": "蓝牙耳机连不上电脑", "w3": 0.47, "top1": 0.563, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 12, "cat": "oral", "q": "电脑开机特别慢怎么优化", "w3": 0.442, "top1": 0.483, "hit": 0, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 13, "cat": "oral", "q": "触摸板不工作，鼠标能用一个", "w3": 0.198, "top1": 0.396, "hit": 0, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 14, "cat": "term", "q": "错误码0009怎么解决", "w3": 0.44, "top1": 0.88, "hit": 1, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 15, "cat": "term", "q": "r8168-dkms 怎么卸载", "w3": 0.724, "top1": 0.976, "hit": 1, "seg": 3, "diff": "easy", "flaky": 0}, {"id": 16, "cat": "term", "q": "nmcli 怎么配置静态 IP", "w3": 0.994, "top1": 0.995, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 17, "cat": "term", "q": "怎么安装 deb 包", "w3": 0.99, "top1": 0.994, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 18, "cat": "term", "q": "怎么查看系统版本和内核版本", "w3": 0.989, "top1": 0.989, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 19, "cat": "term", "q": "时间同步失败怎么办", "w3": 0.857, "top1": 0.957, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 20, "cat": "term", "q": "怎么查看磁盘空间占用", "w3": 0.973, "top1": 0.978, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 21, "cat": "term", "q": "如何查看网卡驱动版本", "w3": 0.978, "top1": 0.995, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 22, "cat": "term", "q": "systemctl 怎么设置服务开机自启", "w3": 0.983, "top1": 0.993, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 23, "cat": "term", "q": "怎么创建新用户", "w3": 0.856, "top1": 0.999, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 24, "cat": "term", "q": "远程桌面连不上", "w3": 0.769, "top1": 0.797, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 25, "cat": "term", "q": "如何修改主机名", "w3": 0.408, "top1": 0.435, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 26, "cat": "multi", "q": "系统升级后网卡不加载，是不是驱动问题", "w3": 0.895, "top1": 0.989, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 27, "cat": "multi", "q": "系统盘满了导致软件商店打不开怎么办", "w3": 0.696, "top1": 0.76, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 28, "cat": "multi", "q": "双系统装完进不去麒麟，怎么修复引导", "w3": 0.921, "top1": 0.976, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 29, "cat": "multi", "q": "输入法卡死而且任务栏状态栏也没了", "w3": 0.599, "top1": 0.718, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 30, "cat": "multi", "q": "忘记密码但又想保留数据，怎么重置", "w3": 0.755, "top1": 0.974, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 31, "cat": "multi", "q": "U盘不识别，换到另一台机器也一样", "w3": 0.617, "top1": 0.734, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 32, "cat": "multi", "q": "打印机驱动装了但打出来是乱码", "w3": 0.49, "top1": 0.622, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 33, "cat": "multi", "q": "装了显卡驱动之后黑屏怎么恢复", "w3": 0.274, "top1": 0.351, "hit": 1, "seg": 2, "diff": "mid", "flaky": 0}, {"id": 34, "cat": "multi", "q": "系统时间不对导致网页证书报错", "w3": 0.0, "top1": 0.0, "hit": 0, "seg": 0, "diff": "mid", "flaky": 1}, {"id": 35, "cat": "multi", "q": "麒麟系统怎么用 Windows 共享的打印机", "w3": 0.974, "top1": 0.976, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 36, "cat": "multi", "q": "远程桌面连上后黑屏", "w3": 0.634, "top1": 0.745, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 37, "cat": "multi", "q": "升级系统后 SSH 连不上服务器", "w3": 0.877, "top1": 0.996, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 38, "cat": "multi", "q": "分辨率改了回不去，显示器不被识别", "w3": 0.576, "top1": 0.771, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 39, "cat": "noans", "q": "麒麟系统怎么部署 Kubernetes 集群", "w3": 0.218, "top1": 0.436, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 40, "cat": "noans", "q": "怎么在麒麟上安装 CUDA 12 驱动", "w3": 0.344, "top1": 0.38, "hit": 1, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 41, "cat": "noans", "q": "Ansible 如何批量管理麒麟服务器", "w3": 0.246, "top1": 0.492, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 42, "cat": "noans", "q": "麒麟怎么配置 Redis 集群", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 43, "cat": "noans", "q": "如何把 GPU 直通给虚拟机使用", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 44, "cat": "noans", "q": "麒麟支持 Docker Swarm 吗", "w3": 0.78, "top1": 0.875, "hit": 0, "seg": 4, "diff": "hard", "flaky": 0}, {"id": 45, "cat": "noans", "q": "怎么把系统数据同步到对象存储", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 46, "cat": "noans", "q": "如何编译一个内核模块", "w3": 0.142, "top1": 0.285, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 47, "cat": "noans", "q": "有没有麒麟手机端的客户端", "w3": 0.108, "top1": 0.217, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 48, "cat": "noans", "q": "kubectl 连不上集群怎么排查", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 49, "cat": "noans", "q": "麒麟怎么配置 nginx 反向代理", "w3": 0.083, "top1": 0.166, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 50, "cat": "noans", "q": "用 vfio 绑定显卡给 KVM 虚拟机", "w3": 0.219, "top1": 0.438, "hit": 1, "seg": 1, "diff": "hard", "flaky": 0}, {"id": 51, "cat": "exact", "q": "软件商店卸载软件报错0004怎么办", "w3": 0.962, "top1": 0.998, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 52, "cat": "exact", "q": "软件商店下载提示网络错误0006", "w3": 0.951, "top1": 0.998, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 53, "cat": "exact", "q": "软件商店提示空间不足错误码0007", "w3": 0.994, "top1": 0.999, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 54, "cat": "exact", "q": "长城TN140A2笔记本指纹用不了", "w3": 0.684, "top1": 0.986, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 55, "cat": "exact", "q": "RTL8111 网卡用什么驱动", "w3": 0.566, "top1": 0.699, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 56, "cat": "exact", "q": "ifcfg 文件里 BOOTPROTO 该设成什么", "w3": 0.46, "top1": 0.92, "hit": 1, "seg": 1, "diff": "mid", "flaky": 0}, {"id": 57, "cat": "syn", "q": "上不了网，ifconfig 看不到网卡", "w3": 0.889, "top1": 0.943, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 58, "cat": "syn", "q": "桌面上的东西全没了", "w3": 0.524, "top1": 0.746, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 59, "cat": "syn", "q": "打不出中文只能打英文", "w3": 0.861, "top1": 0.938, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 60, "cat": "syn", "q": "右下角喇叭图标灰的点不动", "w3": 0.19, "top1": 0.38, "hit": 1, "seg": 1, "diff": "easy", "flaky": 0}, {"id": 61, "cat": "syn", "q": "插了U盘桌面没反应", "w3": 0.802, "top1": 0.949, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 62, "cat": "syn", "q": "应用商店一直转圈进不去", "w3": 0.751, "top1": 0.896, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 63, "cat": "syn", "q": "屏幕上的字特别大改不小", "w3": 0.852, "top1": 0.963, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 64, "cat": "syn", "q": "开机直接进 Windows 了", "w3": 0.728, "top1": 0.832, "hit": 1, "seg": 4, "diff": "easy", "flaky": 0}, {"id": 65, "cat": "cond", "q": "没网的情况下怎么安装 deb 包", "w3": 0.908, "top1": 0.985, "hit": 1, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 66, "cat": "cond", "q": "U盘能识别但打不开提示没有权限", "w3": 0.366, "top1": 0.386, "hit": 0, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 67, "cat": "cond", "q": "电脑能上网但网页打不开", "w3": 0.412, "top1": 0.417, "hit": 0, "seg": 4, "diff": "mid", "flaky": 0}, {"id": 68, "cat": "noans", "q": "ifcfg 里的 NM_CONTROLLED 参数是干什么的", "w3": 0.0, "top1": 0.0, "hit": 1, "seg": 0, "diff": "hard", "flaky": 0}, {"id": 69, "cat": "noans", "q": "麒麟系统支持 Podman 吗", "w3": 0.292, "top1": 0.366, "hit": 1, "seg": 3, "diff": "hard", "flaky": 0}, {"id": 70, "cat": "noans", "q": "怎么在麒麟上用 Flatpak 安装软件", "w3": 0.741, "top1": 0.788, "hit": 0, "seg": 4, "diff": "hard", "flaky": 0}], "sums": {"total": 70, "hit": 63, "rate": 90.0, "stable_total": 69, "stable_rate": 91.3, "cats": {"oral": {"n": 13, "hit": 11, "rate": 84.6}, "term": {"n": 12, "hit": 12, "rate": 100.0}, "multi": {"n": 13, "hit": 12, "rate": 92.3}, "syn": {"n": 8, "hit": 8, "rate": 100.0}, "exact": {"n": 6, "hit": 6, "rate": 100.0}, "cond": {"n": 3, "hit": 1, "rate": 33.3}, "noans": {"n": 15, "hit": 13, "rate": 86.7}}}, "label": "11-06 13:31 · after-alias"}], "catName": {"oral": "口语", "term": "术语", "multi": "多跳", "noans": "无答案", "exact": "精确型", "syn": "同义变体", "cond": "带条件"}, "catOrder": ["oral", "term", "multi", "syn", "exact", "cond", "noans"], "built": "2026-11-06 14:32"};
+const R = D.rounds;
+const fmt = (x,n=3) => x == null ? "—" : Number(x).toFixed(n);
 const sgn = x => (x > 0 ? "+" : "") + x.toFixed(3);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-document.getElementById("meta").textContent = D.meta.line;
+let iA = Math.max(0, R.length - 2), iB = R.length - 1, filter = "all", cur = null;
+
+function label(r){ return r.label; }
+
+function pair(){
+  const A = R[iA], B = R[iB];
+  const ma = new Map(A.items.map(i => [i.id, i]));
+  const mb = new Map(B.items.map(i => [i.id, i]));
+  const ids = [...new Set([...ma.keys(), ...mb.keys()])].sort((x,y) => x-y);
+  return ids.map(id => {
+    const a = ma.get(id), b = mb.get(id), src = b || a;
+    return {
+      id, cat: src.cat, q: src.q, seg: src.seg,
+      w3a: a ? a.w3 : null, w3b: b ? b.w3 : null,
+      hita: a ? a.hit : null, hitb: b ? b.hit : null
+    };
+  });
+}
 
 function renderKpis(){
-  const el = document.getElementById("kpis");
-  const d = hasB ? +(B.rate - A.rate).toFixed(1) : null;
-  const ds = hasB ? +(B.stable_rate - A.stable_rate).toFixed(1) : null;
-  const better = hasB ? items.filter(i => i.w3b != null && i.w3b - i.w3a > 0.02).length : 0;
-  const worse  = hasB ? items.filter(i => i.w3b != null && i.w3a - i.w3b > 0.02).length : 0;
-  const cls = v => v == null ? "flat" : (v > 0 ? "up" : v < 0 ? "down" : "flat");
-  el.innerHTML = `
-    <div class="kpi"><div class="k">总命中率</div>
-      <div class="v">${B.rate.toFixed(1)}%</div>
-      <div class="d ${cls(d)}">${hasB ? (d>=0?"↑ ":"↓ ") + Math.abs(d) + " pt（改前 " + A.rate.toFixed(1) + "%）" : "单轮结果"}</div></div>
-    <div class="kpi"><div class="k">通过题数</div>
-      <div class="v">${B.hit}/${B.total}</div>
-      <div class="d flat">改前 ${A.hit}/${A.total}</div></div>
-    <div class="kpi"><div class="k">剔除 flaky 后</div>
-      <div class="v">${B.stable_rate.toFixed(1)}%</div>
-      <div class="d ${cls(ds)}">${hasB ? (ds>=0?"↑ ":"↓ ") + Math.abs(ds) + " pt（改前 " + A.stable_rate.toFixed(1) + "%）" : "—"}</div></div>
-    <div class="kpi"><div class="k">变化题数</div>
-      <div class="v">${better + worse}</div>
+  const A = R[iA], B = R[iB], items = cur;
+  const d = +(B.sums.rate - A.sums.rate).toFixed(1);
+  const ds = +(B.sums.stable_rate - A.sums.stable_rate).toFixed(1);
+  const better = items.filter(i => i.w3a != null && i.w3b != null && i.w3b - i.w3a > 0.02).length;
+  const worse  = items.filter(i => i.w3a != null && i.w3b != null && i.w3a - i.w3b > 0.02).length;
+  const cls = v => v > 0 ? "up" : v < 0 ? "down" : "flat";
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><div class="k">总命中率</div><div class="v">${B.sums.rate.toFixed(1)}%</div>
+      <div class="d ${cls(d)}">${(d>=0?"↑ ":"↓ ")+Math.abs(d)} pt　基准 ${A.sums.rate.toFixed(1)}%</div></div>
+    <div class="kpi"><div class="k">通过题数</div><div class="v">${B.sums.hit}/${B.sums.total}</div>
+      <div class="d flat">基准 ${A.sums.hit}/${A.sums.total}</div></div>
+    <div class="kpi"><div class="k">剔除 flaky 后</div><div class="v">${B.sums.stable_rate.toFixed(1)}%</div>
+      <div class="d ${cls(ds)}">${(ds>=0?"↑ ":"↓ ")+Math.abs(ds)} pt　基准 ${A.sums.stable_rate.toFixed(1)}%</div></div>
+    <div class="kpi"><div class="k">变化题数</div><div class="v">${better+worse}</div>
       <div class="d"><span class="up">↑ ${better}</span>　<span class="down">↓ ${worse}</span></div></div>`;
 }
 
 function renderCats(){
-  const el = document.getElementById("cats");
-  const rows = D.catOrder.filter(c => B.cats[c] || A.cats[c]).map(c => {
-    const a = A.cats[c], b = B.cats[c];
-    const va = a ? a.rate : 0, vb = b ? b.rate : 0;
-    const d = hasB ? (vb - va) : null;
-    const cls = d == null ? "flat" : d > 0.5 ? "up" : d < -0.5 ? "down" : "flat";
-    const colB = !hasB ? "#1D9E75" : (d > 0.5 ? "#1D9E75" : d < -0.5 ? "#C0492A" : "#8CBFAC");
-    return `<div class="bar-row" style="align-items:center">
-      <div class="bar-name">${D.catName[c] || c}<span style="color:var(--t3)"> ·${(b||a).n}题</span></div>
+  const A = R[iA], B = R[iB];
+  document.getElementById("cats").innerHTML = D.catOrder.filter(c => A.sums.cats[c] || B.sums.cats[c]).map(c => {
+    const a = A.sums.cats[c], b = B.sums.cats[c];
+    const va = a ? a.rate : 0, vb = b ? b.rate : 0, d = +(vb - va).toFixed(1);
+    const cls = d > 0.5 ? "up" : d < -0.5 ? "down" : "flat";
+    const col = d > 0.5 ? "#1D9E75" : d < -0.5 ? "#C0492A" : "#8CBFAC";
+    return `<div class="bar-row">
+      <div class="bar-name">${D.catName[c]||c}<span style="color:var(--t3)"> ·${(b||a).n}题</span></div>
       <div class="pair">
         <div class="tr"><div class="fl" style="width:${va}%;background:#CFCBC2"></div></div>
-        <div class="tr"><div class="fl" style="width:${vb}%;background:${colB}"></div></div>
+        <div class="tr"><div class="fl" style="width:${vb}%;background:${col}"></div></div>
       </div>
-      <div class="bar-val">${hasB ? va.toFixed(1) + "% → " : ""}${vb.toFixed(1)}% <span class="${cls}">${hasB ? (d>0?"+":"") + d.toFixed(1) : ""}</span></div>
+      <div class="bar-val">${va.toFixed(1)}% → ${vb.toFixed(1)}% <span class="${cls}">${d>0?"+":""}${d}</span></div>
     </div>`;
   }).join("");
-  el.innerHTML = rows;
 }
 
 function renderScatter(){
-  const W = 900, H = 420, P = 52;
-  const iw = W - P*2, ih = H - P*2;
-  const X = v => P + v * iw, Y = v => H - P - v * ih;
-  const ticks = [0,0.2,0.4,0.6,0.8,1];
+  const W = 900, H = 420, P = 52, iw = W-P*2, ih = H-P*2;
+  const X = v => P + v*iw, Y = v => H - P - v*ih;
   let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">`;
-  ticks.forEach(t => {
-    s += `<line x1="${X(t)}" y1="${Y(0)}" x2="${X(t)}" y2="${Y(1)}" stroke="#F0EEE8" stroke-width="1"/>`;
-    s += `<line x1="${X(0)}" y1="${Y(t)}" x2="${X(1)}" y2="${Y(t)}" stroke="#F0EEE8" stroke-width="1"/>`;
+  [0,.2,.4,.6,.8,1].forEach(t => {
+    s += `<line x1="${X(t)}" y1="${Y(0)}" x2="${X(t)}" y2="${Y(1)}" stroke="#F0EEE8"/>`;
+    s += `<line x1="${X(0)}" y1="${Y(t)}" x2="${X(1)}" y2="${Y(t)}" stroke="#F0EEE8"/>`;
     s += `<text x="${X(t)}" y="${Y(0)+20}" font-size="11" fill="#8C8A83" text-anchor="middle">${t}</text>`;
     s += `<text x="${P-12}" y="${Y(t)+4}" font-size="11" fill="#8C8A83" text-anchor="end">${t}</text>`;
   });
-  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" stroke="#C9C5BA" stroke-width="1" stroke-dasharray="5 5"/>`;
-  s += `<text x="${X(0.88)}" y="${Y(0.10)}" font-size="11" fill="#B4B2A9" text-anchor="end">虚线＝无变化</text>`;
-  s += `<text x="${W/2}" y="${H-10}" font-size="12" fill="#5F5E5A" text-anchor="middle">改动前 w3</text>`;
-  s += `<text x="14" y="${H/2}" font-size="12" fill="#5F5E5A" text-anchor="middle" transform="rotate(-90 14 ${H/2})">改动后 w3</text>`;
-
-  items.forEach(it => {
-    if (it.w3b == null) return;
+  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" stroke="#C9C5BA" stroke-dasharray="5 5"/>`;
+  s += `<text x="${X(0.96)}" y="${Y(0.06)}" font-size="11" fill="#B4B2A9" text-anchor="end">虚线＝无变化</text>`;
+  s += `<text x="${W/2}" y="${H-8}" font-size="12" fill="#5F5E5A" text-anchor="middle">基准 w3</text>`;
+  s += `<text x="14" y="${H/2}" font-size="12" fill="#5F5E5A" text-anchor="middle" transform="rotate(-90 14 ${H/2})">当前 w3</text>`;
+  cur.forEach(it => {
+    if (it.w3a == null || it.w3b == null) return;
     const d = it.w3b - it.w3a;
     const col = d > 0.02 ? "#1D9E75" : d < -0.02 ? "#C0492A" : "#A8A49A";
-    const r = Math.abs(d) > 0.25 ? 6 : 4;
-    s += `<circle cx="${X(it.w3a)}" cy="${Y(it.w3b)}" r="${r}" fill="${col}" fill-opacity=".72" stroke="#fff" stroke-width=".8">`;
-    s += `<title>#${it.id} ${esc(it.q)}\n改前 ${fmt(it.w3a)} → 改后 ${fmt(it.w3b)}（${sgn(d)}）</title></circle>`;
+    s += `<circle cx="${X(it.w3a)}" cy="${Y(it.w3b)}" r="${Math.abs(d)>0.25?6:4}" fill="${col}" fill-opacity=".72" stroke="#fff" stroke-width=".8">` +
+         `<title>#${it.id} ${esc(it.q)}\n基准 ${fmt(it.w3a)} → 当前 ${fmt(it.w3b)}（${sgn(d)}）</title></circle>`;
   });
-  s += `</svg>`;
-  document.getElementById("scatter").innerHTML = s;
-
-  const off = items.filter(i => i.w3b != null && Math.abs(i.w3b - i.w3a) > 0.05).length;
+  document.getElementById("scatter").innerHTML = s + `</svg>`;
+  const off = cur.filter(i => i.w3a!=null && i.w3b!=null && Math.abs(i.w3b-i.w3a) > 0.05).length;
   document.getElementById("scatterNote").textContent =
-    `${items.length} 道题中，${off} 道变化超过 0.05，其余基本贴着对角线——说明这次改动只影响了特定几道题。`;
+    `${cur.length} 道题中只有 ${off} 道变化超过 0.05，其余贴着对角线——改动影响的是特定几道题，不是整体漂移。`;
 }
 
 function renderMovers(){
-  if (!hasB) { document.getElementById("movers").innerHTML = '<p class="hint">单轮数据，无对比。</p>'; return; }
-  const arr = items.filter(i => i.w3b != null).map(i => ({...i, d: i.w3b - i.w3a}));
-  const up = arr.filter(i => i.d > 0).sort((x,y) => y.d - x.d).slice(0, 5);
-  const dn = arr.filter(i => i.d < 0).sort((x,y) => x.d - y.d).slice(0, 5);
-  const max = Math.max(...[...up, ...dn].map(i => Math.abs(i.d)), 0.01);
-  const row = (i, sign) => `<div class="bar-row" style="grid-template-columns:1fr 260px 62px">
+  const arr = cur.filter(i => i.w3a != null && i.w3b != null).map(i => ({...i, d: i.w3b - i.w3a}));
+  const up = arr.filter(i => i.d > 0.02).sort((x,y) => y.d - x.d).slice(0,5);
+  const dn = arr.filter(i => i.d < -0.02).sort((x,y) => x.d - y.d).slice(0,5);
+  if (!up.length && !dn.length){
+    document.getElementById("movers").innerHTML = '<p class="hint">两轮无超过 ±0.02 的变化。</p>'; return;
+  }
+  const max = Math.max(...[...up,...dn].map(i => Math.abs(i.d)), 0.01);
+  const row = (i, sign) => `<div class="bar-row" style="grid-template-columns:1fr 240px 64px">
       <div class="bar-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">#${i.id} ${esc(i.q)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.abs(i.d)/max*100}%;background:${sign>0?"#1D9E75":"#C0492A"}"></div></div>
-      <div class="bar-val ${sign>0?"up":"down"}">${sgn(i.d)}</div>
-    </div>`;
+      <div class="pair"><div class="tr"><div class="fl" style="width:${Math.abs(i.d)/max*100}%;background:${sign>0?"#1D9E75":"#C0492A"}"></div></div></div>
+      <div class="bar-val ${sign>0?"up":"down"}">${sgn(i.d)}</div></div>`;
+  const cap = t => `<div style="font-size:12px;color:var(--t3);margin:2px 0 9px">${t}</div>`;
   document.getElementById("movers").innerHTML =
-    up.map(i => row(i, 1)).join("") + dn.map(i => row(i, -1)).join("");
+    (up.length ? cap("↑ 提升") + up.map(i=>row(i,1)).join("") : "") +
+    (dn.length ? cap("↓ 退步") + dn.map(i=>row(i,-1)).join("") : "");
 }
 
-let filter = "all";
 function renderFilters(){
   const counts = {};
-  items.forEach(i => counts[i.cat] = (counts[i.cat] || 0) + 1);
-  const chips = [`<button class="chip on" data-c="all">全部 ${items.length}</button>`]
+  cur.forEach(i => counts[i.cat] = (counts[i.cat]||0) + 1);
+  const chips = [`<button class="chip ${filter==="all"?"on":""}" data-c="all">全部 ${cur.length}</button>`]
     .concat(D.catOrder.filter(c => counts[c]).map(c =>
-      `<button class="chip" data-c="${c}">${D.catName[c] || c} ${counts[c]}</button>`));
+      `<button class="chip ${filter===c?"on":""}" data-c="${c}">${D.catName[c]||c} ${counts[c]}</button>`));
   const el = document.getElementById("filters");
   el.innerHTML = chips.join("");
-  el.querySelectorAll(".chip").forEach(b => b.onclick = () => {
-    el.querySelectorAll(".chip").forEach(x => x.classList.remove("on"));
-    b.classList.add("on");
-    filter = b.dataset.c;
-    renderTable();
-  });
+  el.querySelectorAll(".chip").forEach(b => b.onclick = () => { filter = b.dataset.c; renderFilters(); renderTable(); });
 }
 
 function renderTable(){
-  const rows = items.filter(i => filter === "all" || i.cat === filter);
+  const rows = cur.filter(i => filter === "all" || i.cat === filter);
   document.getElementById("tbody").innerHTML = rows.map(i => {
-    const d = i.w3b == null ? null : i.w3b - i.w3a;
+    const d = (i.w3a==null || i.w3b==null) ? null : i.w3b - i.w3a;
     const cls = d == null ? "flat" : d > 0.02 ? "up" : d < -0.02 ? "down" : "flat";
     const res = i.hitb == null ? "" : (i.hitb ? '<span class="tag hit">通过</span>' : '<span class="tag miss">未过</span>');
-    return `<tr>
-      <td class="num">${i.id}</td>
-      <td><span class="tag">${D.catName[i.cat] || i.cat}</span></td>
+    return `<tr><td class="num">${i.id}</td>
+      <td><span class="tag">${D.catName[i.cat]||i.cat}</span></td>
       <td>${esc(i.q)}</td>
-      <td class="num">${fmt(i.w3a)}</td>
-      <td class="num">${fmt(i.w3b)}</td>
-      <td class="num ${cls}">${d == null ? "—" : sgn(d)}</td>
-      <td>${res}</td>
-    </tr>`;
+      <td class="num">${fmt(i.w3a)}</td><td class="num">${fmt(i.w3b)}</td>
+      <td class="num ${cls}">${d==null?"—":sgn(d)}</td><td>${res}</td></tr>`;
   }).join("");
 }
 
-document.getElementById("foot").textContent = D.meta.foot;
-renderKpis(); renderCats(); renderScatter(); renderMovers(); renderFilters(); renderTable();
+function renderAll(noHash){
+  cur = pair();
+  const A = R[iA], B = R[iB];
+  document.getElementById("note").textContent =
+    iA === iB ? "同一轮，无对比" : `${Math.abs(iB-iA)} 轮之差`;
+  renderKpis(); renderCats(); renderScatter(); renderMovers(); renderFilters(); renderTable();
+  if (!noHash) location.hash = iA + "-" + iB;
+}
+
+function initSelects(){
+  const opt = r => `<option value="${r.i}">${esc(label(r))}</option>`;
+  const sa = document.getElementById("selA"), sb = document.getElementById("selB");
+  sa.innerHTML = R.map((r,i) => ({...r, i})).map(opt).join("");
+  sb.innerHTML = sa.innerHTML;
+  sa.value = iA; sb.value = iB;
+  sa.onchange = () => { iA = +sa.value; renderAll(); };
+  sb.onchange = () => { iB = +sb.value; renderAll(); };
+  document.getElementById("swapBtn").onclick = () => {
+    [iA, iB] = [iB, iA];
+    sa.value = iA; sb.value = iB; renderAll();
+  };
+}
+
+window.addEventListener("hashchange", () => {
+  const m = location.hash.match(/^#(\d+)-(\d+)$/);
+  if (!m) return;
+  const a = +m[1], b = +m[2];
+  if (a >= R.length || b >= R.length || (a === iA && b === iB)) return;
+  iA = a; iB = b;
+  document.getElementById("selA").value = iA;
+  document.getElementById("selB").value = iB;
+  renderAll(true);
+});
+
+function boot(){
+  R.forEach(r => { if (!r.label) r.label = r.name; });
+  const m = location.hash.match(/^#(\d+)-(\d+)$/);
+  if (m && +m[1] < R.length && +m[2] < R.length){ iA = +m[1]; iB = +m[2]; }
+  document.getElementById("sub").textContent =
+    `${R.length} 轮历史数据　·　生成于 ${D.built}`;
+  document.getElementById("foot").textContent =
+    "由 eval/report.py 生成　·　数据源 eval/results/*.csv";
+  initSelects(); renderAll();
+}
+boot();
 </script>
 </body>
 </html>

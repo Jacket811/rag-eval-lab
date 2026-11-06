@@ -163,7 +163,16 @@ python run_eval.py --diff a.csv b.csv
 python report.py                     # 生成单文件 HTML 报告
 ```
 
-`report.py` 把两轮 CSV 渲染成一个自包含的网页：总命中率、分类对比、逐题散点、变化最大的题、可筛选的明细表。**零外部依赖，离线可开，双击即看**，也可以直接放到 GitHub Pages。
+`report.py` 把 `results/` 下的**全部轮次**塞进一个自包含网页，页面顶部用下拉框随时切换「对比基准 / 当前」，不用重新生成、不用记文件名：
+
+```
+python report.py          # 载入全部轮次，默认对比最近两轮
+python report.py --open   # 生成后自动打开浏览器
+```
+
+页面包含：KPI 对比、7 类命中率上下双条、逐题散点（对角线＝无变化）、升降最大的各 5 题、按类别筛选的明细表。
+
+**零外部依赖**（内联 SVG，不加载任何 CDN），离线可开，也可以直接放到 GitHub Pages。
 
 生成的报告长什么样：见 [eval/report.html](eval/report.html)（下载后用浏览器打开）
 
