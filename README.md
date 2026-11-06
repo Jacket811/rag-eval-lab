@@ -160,7 +160,12 @@ Dify 是目前最火的开源 LLM 应用平台（16 万星），不用它需要�
 python run_eval.py --validate        # 校验题库要点是否真的在库里
 python run_eval.py --run --tag xxx   # 跑一轮并打标签
 python run_eval.py --diff a.csv b.csv
+python report.py                     # 生成单文件 HTML 报告
 ```
+
+`report.py` 把两轮 CSV 渲染成一个自包含的网页：总命中率、分类对比、逐题散点、变化最大的题、可筛选的明细表。**零外部依赖，离线可开，双击即看**，也可以直接放到 GitHub Pages。
+
+![评估报告](eval/report.html)
 
 题库分四类，各 12-13 题：
 
