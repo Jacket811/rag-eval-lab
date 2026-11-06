@@ -16,6 +16,7 @@ RAG 评估 · 本地控制台
     评估逻辑一行都没改，还是那个 run_eval.py。
 """
 import argparse
+import io
 import json
 import os
 import re
@@ -32,6 +33,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 DEFAULT_PORT = 8899
+OWUI_CONTAINER = os.environ.get("OWUI_CONTAINER", "open-webui")
 
 # ===== 运行时状态 =====
 STATE = {
@@ -46,6 +48,152 @@ STATE = {
 }
 LOCK = threading.Lock()
 PROC = {"p": None}
+
+
+def sh(cmd, timeout=25):
+    """跑命令，失败返回 None"""
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                           timeout=timeout, errors="replace")
+        if r.returncode != 0:
+            return None
+        return (r.stdout or "").strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+# ===================== 参数读写 =====================
+
+# 只开放这几个：改错了重启就能恢复，不会破坏索引
+EDITABLE = [
+    {"key": "rag.top_k", "label": "粗召回 top_k", "type": "int", "min": 1, "max": 50,
+     "hint": "候选池大小。调小会让正确答案进不了池子，别低于 8"},
+    {"key": "rag.top_k_reranker", "label": "送模型段数 k_reranker", "type": "int", "min": 1, "max": 20,
+     "hint": "最终送给模型的资料段数。改小省 token，但可能漏掉答案"},
+    {"key": "rag.relevance_threshold", "label": "相关度阈值", "type": "float", "min": 0.0, "max": 1.0,
+     "hint": "低于此分数的资料不送模型。调高会连正确资料一起滤掉"},
+    {"key": "rag.enable_hybrid_search", "label": "混合检索", "type": "bool", "min": None, "max": None,
+     "hint": "关掉只剩向量检索，中文术语命中会明显下降"},
+]
+EDIT_KEYS = [x["key"] for x in EDITABLE]
+
+
+def _read_cfg(keys):
+    code = (
+        "import sqlite3,json\n"
+        "c=sqlite3.connect('/app/backend/data/webui.db')\n"
+        "keys=%r\n"
+        "out={}\n"
+        "for k in keys:\n"
+        "    r=c.execute('select value from config where key=?',(k,)).fetchone()\n"
+        "    if r is None: continue\n"
+        "    v=r[0]\n"
+        "    try: v=json.loads(v)\n"
+        "    except Exception: pass\n"
+        "    out[k]=v\n"
+        "print(json.dumps(out,ensure_ascii=False))\n"
+    ) % (keys,)
+    out = sh(["docker", "exec", OWUI_CONTAINER, "python", "-c", code], timeout=40)
+    if not out:
+        return None
+    try:
+        return json.loads(out.splitlines()[-1])
+    except (ValueError, IndexError):
+        return None
+
+
+def read_params():
+    vals = _read_cfg(EDIT_KEYS)
+    if vals is None:
+        return {"ok": False, "error": "读不到配置（容器没起？）"}
+    items = []
+    for meta in EDITABLE:
+        items.append(dict(meta, value=vals.get(meta["key"])))
+    return {"ok": True, "items": items}
+
+
+def write_params(changes):
+    """只接受白名单内的键，逐项校验；写前备份原值"""
+    clean, errors = {}, []
+    for meta in EDITABLE:
+        k = meta["key"]
+        if k not in changes:
+            continue
+        raw = changes[k]
+        try:
+            if meta["type"] == "bool":
+                if not isinstance(raw, bool):
+                    raise ValueError("应为布尔值")
+                clean[k] = raw
+            elif meta["type"] == "int":
+                v = int(raw)
+                if not (meta["min"] <= v <= meta["max"]):
+                    raise ValueError("超出范围 %s~%s" % (meta["min"], meta["max"]))
+                clean[k] = v
+            else:
+                v = float(raw)
+                if not (meta["min"] <= v <= meta["max"]):
+                    raise ValueError("超出范围 %s~%s" % (meta["min"], meta["max"]))
+                clean[k] = round(v, 3)
+        except (TypeError, ValueError) as e:
+            errors.append("%s: %s" % (meta["label"], e))
+
+    if errors:
+        return {"ok": False, "error": "；".join(errors)}
+    if not clean:
+        return {"ok": False, "error": "没有要改的项"}
+
+    before = _read_cfg(list(clean.keys())) or {}
+    # 备份
+    try:
+        bk = os.path.join(HERE, "results", "config-backup.json")
+        os.makedirs(os.path.dirname(bk), exist_ok=True)
+        hist = []
+        if os.path.exists(bk):
+            try:
+                hist = json.load(open(bk, encoding="utf-8"))
+            except (ValueError, IOError):
+                hist = []
+        hist.append({"ts": time.strftime("%Y-%m-%d %H:%M:%S"), "before": before, "after": clean})
+        io.open(bk, "w", encoding="utf-8", newline="\n").write(
+            json.dumps(hist[-20:], ensure_ascii=False, indent=2))
+    except (IOError, OSError):
+        pass
+
+    code = (
+        "import sqlite3,json,time\n"
+        "c=sqlite3.connect('/app/backend/data/webui.db')\n"
+        "changes=json.loads(%r)\n"
+        "now=int(time.time())\n"
+        "for k,v in changes.items():\n"
+        "    val=json.dumps(v) if isinstance(v,bool) else str(v)\n"
+        "    c.execute('update config set value=?, updated_at=? where key=?',(val,now,k))\n"
+        "c.commit()\n"
+        "print('ok')\n"
+    ) % (json.dumps(clean, ensure_ascii=False),)
+    out = sh(["docker", "exec", OWUI_CONTAINER, "python", "-c", code], timeout=40)
+    if not out or "ok" not in out:
+        return {"ok": False, "error": "写入失败：" + (out or "无输出")[:120]}
+    return {"ok": True, "before": before, "after": clean,
+            "need_restart": True}
+
+
+def restart_owui():
+    out = sh(["docker", "restart", OWUI_CONTAINER], timeout=90)
+    if out is None:
+        return {"ok": False, "error": "重启失败"}
+    # 等它就绪
+    import urllib.request
+    base = os.environ.get("OWUI_BASE", "http://127.0.0.1:3000")
+    for _ in range(30):
+        time.sleep(2)
+        try:
+            with urllib.request.urlopen(base, timeout=5) as r:
+                if r.status == 200:
+                    return {"ok": True, "msg": "已重启并就绪"}
+        except Exception:
+            continue
+    return {"ok": False, "error": "重启后 60 秒内未就绪，请检查 docker logs open-webui"}
 
 
 # ===================== 环境探测 =====================
@@ -254,6 +402,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"lines": lines, "next": total,
                                     "running": running, "csv": done_csv})
 
+        if path == "/api/params":
+            return self._send(200, read_params())
+
         if path == "/api/check":
             return self._send(200, {"token": read_token_status()})
 
@@ -279,6 +430,12 @@ class Handler(BaseHTTPRequestHandler):
             tag = re.sub(r"[^\w\u4e00-\u9fa5.-]+", "_", tag)[:40]
             threading.Thread(target=run_job, args=(tag,), daemon=True).start()
             return self._send(200, {"ok": True, "tag": tag})
+
+        if u.path == "/api/params":
+            return self._send(200, write_params(body.get("changes") or {}))
+
+        if u.path == "/api/restart":
+            return self._send(200, restart_owui())
 
         if u.path == "/api/stop":
             proc = PROC.get("p")

@@ -49,6 +49,21 @@ pre.log::-webkit-scrollbar-thumb{background:#444;border-radius:4px}
 .run .nm{color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .run .rt{font-variant-numeric:tabular-nums;color:var(--t1);font-weight:500;flex:none}
 .run .no{color:var(--t3);font-size:11px}
+.param{display:grid;grid-template-columns:1fr 96px;gap:10px;align-items:center;
+  padding:10px 0;border-bottom:1px solid #F2F0EB}
+.param:last-child{border-bottom:none}
+.param .pl{font-size:13px}
+.param .ph{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.5}
+.param input[type=number]{width:100%;font:inherit;font-size:13px;padding:7px 9px;
+  border:1px solid var(--line);border-radius:7px;text-align:right;background:#fff}
+.param input[type=number]:focus{outline:2px solid #CFCBC2;outline-offset:1px}
+.sw{position:relative;width:44px;height:24px;justify-self:end;cursor:pointer}
+.sw input{display:none}
+.sw span{display:block;width:44px;height:24px;background:#DCD8CE;border-radius:12px;transition:.15s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;
+  background:#fff;border-radius:50%;transition:.15s}
+.sw input:checked + span{background:var(--good)}
+.sw input:checked + span::after{transform:translateX(20px)}
 .msg{margin-top:12px;padding:11px 14px;border-radius:9px;font-size:13px;display:none}
 .msg.ok{display:block;background:var(--good-bg);color:#0F6E56}
 .msg.bad{display:block;background:var(--bad-bg);color:#993C1D}
@@ -70,6 +85,14 @@ pre.log::-webkit-scrollbar-thumb{background:#444;border-radius:4px}
           <div class="chk"><span class="dot wait"></span><span class="n">正在检测…</span></div>
         </div>
         <div class="kv" id="qinfo"></div>
+      </div>
+
+      <div class="card">
+        <h2>检索参数</h2>
+        <p class="hint">改完会重启 Open WebUI 生效。原值备份在 <code>results/config-backup.json</code>。</p>
+        <div id="params"><span class="empty">加载中…</span></div>
+        <button class="btn-line" id="btnSaveParams" style="margin-top:14px">保存并重启</button>
+        <div class="msg" id="pmsg"></div>
       </div>
 
       <div class="card">
@@ -285,6 +308,82 @@ $("btnRun").onclick = async () => {
   startPolling();
 };
 
+let PARAMS = [];
+let PARAMS_ORIG = {};
+
+function renderParams(){
+  const el = $("params");
+  if (!PARAMS.length){ el.innerHTML = '<span class="empty">读不到参数</span>'; return; }
+  PARAMS_ORIG = {};
+  el.innerHTML = PARAMS.map((p, i) => {
+    PARAMS_ORIG[p.key] = p.value;
+    const right = p.type === "bool"
+      ? `<label class="sw"><input type="checkbox" id="p${i}" ${p.value ? "checked" : ""}><span></span></label>`
+      : `<input type="number" id="p${i}" value="${p.value == null ? "" : p.value}" step="${p.type === "float" ? "0.01" : "1"}" min="${p.min}" max="${p.max}">`;
+    return `<div class="param">
+      <div><div class="pl">${esc(p.label)}</div><div class="ph">${esc(p.hint || "")}</div></div>
+      <div style="justify-self:end;width:100%">${right}</div>
+    </div>`;
+  }).join("");
+}
+
+async function loadParams(){
+  try{
+    const r = await jget("/api/params");
+    if (!r.ok){ $("params").innerHTML = `<span class="empty">${esc(r.error || "读不到参数")}</span>`; return; }
+    PARAMS = r.items;
+    renderParams();
+  }catch(e){
+    $("params").innerHTML = `<span class="empty">读取失败：${esc(e.message)}</span>`;
+  }
+}
+
+$("btnSaveParams").onclick = async () => {
+  const changes = {};
+  PARAMS.forEach((p, i) => {
+    const el = $("p" + i);
+    if (!el) return;
+    let v;
+    if (p.type === "bool") v = el.checked;
+    else if (p.type === "float") v = parseFloat(el.value);
+    else v = parseInt(el.value, 10);
+    if (Number.isNaN(v)) return;
+    if (String(v) !== String(PARAMS_ORIG[p.key])) changes[p.key] = v;
+  });
+
+  if (!Object.keys(changes).length){
+    $("pmsg").className = "msg warn";
+    $("pmsg").textContent = "没有改动。";
+    return;
+  }
+
+  $("btnSaveParams").disabled = true;
+  $("btnSaveParams").textContent = "写入中…";
+  const w = await jpost("/api/params", {changes});
+  if (!w.ok){
+    $("pmsg").className = "msg bad";
+    $("pmsg").textContent = "保存失败：" + (w.error || "");
+    $("btnSaveParams").disabled = false;
+    $("btnSaveParams").textContent = "保存并重启";
+    return;
+  }
+
+  $("btnSaveParams").textContent = "重启中（约 20 秒）…";
+  const r = await jpost("/api/restart", {});
+  $("btnSaveParams").disabled = false;
+  $("btnSaveParams").textContent = "保存并重启";
+
+  if (r.ok){
+    const diff = Object.keys(w.after).map(k => `${k}: ${w.before[k]} → ${w.after[k]}`).join("　");
+    $("pmsg").className = "msg ok";
+    $("pmsg").textContent = "已保存并重启。" + diff;
+    await loadParams();
+  } else {
+    $("pmsg").className = "msg bad";
+    $("pmsg").textContent = "参数已写入，但重启失败：" + (r.error || "") + "（可以手动 docker restart open-webui）";
+  }
+};
+
 $("btnStop").onclick = async () => {
   $("btnStop").disabled = true;
   $("btnStop").textContent = "停止中…";
@@ -296,6 +395,7 @@ $("btnReport").onclick = () => { window.open("/report.html", "_blank"); };
 $("tag").addEventListener("keydown", e => { if (e.key === "Enter" && !$("btnRun").disabled) $("btnRun").click(); });
 
 (async () => {
+  loadParams();
   const st = await refresh();
   STATE.totalQ = (st.questions && st.questions.total) || 70;
 })();

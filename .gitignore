@@ -20,6 +20,7 @@ webui.db
 # ===== 评估结果：只保留代表性样本，新跑的不入库 =====
 eval/results/*.csv
 eval/results/*.meta.json
+eval/results/config-backup.json
 !eval/results/*-v2-70q.csv
 !eval/results/*-after-alias.csv
 !eval/results/*-v2-70q.meta.json
