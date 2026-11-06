@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rag-eval-lab · 中文 RAG 检索层评估</title>
+<style>
+:root{--bg:#FBFAF7;--card:#fff;--line:#E5E2DA;--t1:#1F1E1B;--t2:#5F5E5A;--t3:#8C8A83;--acc:#1D9E75}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t1);min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:28px;
+  font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.box{max-width:560px;width:100%}
+h1{font-size:26px;font-weight:600;margin:0 0 8px;letter-spacing:-.4px}
+.lead{color:var(--t2);margin:0 0 6px}
+.dim{color:var(--t3);font-size:13px;margin:0 0 26px}
+.btn{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:17px 20px;margin-bottom:10px;text-decoration:none;color:var(--t1);transition:border-color .12s}
+.btn:hover{border-color:#C9C5BA}
+.btn .t{font-weight:500}
+.btn .d{font-size:12px;color:var(--t3);margin-top:2px}
+.btn .arrow{color:var(--t3);font-size:18px}
+.btn.primary{background:#F2FAF6;border-color:#BCE3D3}
+.btn.primary .arrow{color:var(--acc)}
+.kv{display:flex;gap:26px;margin:26px 0 0;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.kv div{font-size:13px;color:var(--t3)}
+.kv b{display:block;font-size:20px;font-weight:600;color:var(--t1);letter-spacing:-.3px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>rag-eval-lab</h1>
+  <p class="lead">给中文技术文档 RAG 建一套可量化的检索层评估：70 题分 7 类，改动前后用数字说话。</p>
+  <p class="dim">方法不限领域，示例题库来自麒麟系统文档。</p>
+
+  <a class="btn primary" href="eval/report.html">
+    <span><span class="t">查看评估报告</span><span class="d">70 题 · 7 类 · 改动前后对比，可切换任意两轮</span></span>
+    <span class="arrow">→</span>
+  </a>
+  <a class="btn" href="articles/8gb-vram-rag-notes.md">
+    <span><span class="t">读长文</span><span class="d">8GB 显存跑 8B 模型 + RAG：一份完整的账</span></span>
+    <span class="arrow">→</span>
+  </a>
+  <a class="btn" href="https://github.com/Jacket811/rag-eval-lab">
+    <span><span class="t">源码与数据</span><span class="d">评估脚本、观测快照、原始 CSV</span></span>
+    <span class="arrow">→</span>
+  </a>
+
+  <div class="kv">
+    <div><b>70</b>道分层题目</div>
+    <div><b>90.0%</b>检索命中率</div>
+    <div><b>+7.1</b>改文档后的提升</div>
+  </div>
+</div>
+</body>
+</html>
